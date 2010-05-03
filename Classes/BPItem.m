@@ -11,4 +11,11 @@
 
 @implementation BPItem
 
+@synthesize name, path, type;
+
+- (NSString*)contents {
+	NSError *err;
+	return [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&err];
+}
+
 @end

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "BPItem.h"
 
 
 @interface BPItemManager : NSObject {
@@ -14,5 +15,11 @@
 }
 
 + (BPItemManager*)sharedInstance;
+
+- (NSArray*)rootItems;
+- (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath;
+
+- (BOOL)saveItem:(BPItem*)item withText:(NSString*)text error:(NSError**)err;
+
 
 @end

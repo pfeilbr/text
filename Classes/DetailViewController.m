@@ -17,33 +17,25 @@ enum TextViewActions {
 
 @interface DetailViewController ()
 @property (nonatomic, retain) UIPopoverController *popoverController;
-- (void)configureView;
 @end
-
 
 
 @implementation DetailViewController
 
-@synthesize toolbar, popoverController, detailItem, detailDescriptionLabel, textView, rootViewController, actionsButton, actionSheet;
-
-
-#pragma mark -
-#pragma mark Object insertion
-
-- (IBAction)insertNewObject:(id)sender {
-	
-	[rootViewController insertNewObject:sender];	
-}
+@synthesize toolbar, itemLabel, itemLabelTextField, itemLabelBarButtonItem, popoverController, detailDescriptionLabel, textView, keyboardAccessoryView, rootViewController, actionsButton, actionSheet, settingsButton;
+@synthesize item;
 
 #pragma mark ActionSheet Delegate
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-	NSString *fileName = [NSString stringWithString:@"<filename here>"];
+	[self saveCurrentItem];
+	
+	NSString *fileName = item.name;
 
 	switch (buttonIndex) {
 		case EMAIL:
 		{
-			NSString *body = [textView emailText];
+			NSString *body = [item contents];
 			MFMailComposeViewController *vc = [[MFMailComposeViewController alloc] init];
 			vc.mailComposeDelegate = self;		
 			[vc setSubject:fileName];        
@@ -90,6 +82,12 @@ enum TextViewActions {
 	//[NSTimer scheduledTimerWithTimeInterval:0.25 target:self selector:@selector(resizePerformRequestButton) userInfo:nil repeats:NO];
 }
 
+- (void)itemLabelTextFieldDidEndEditingNotification:(NSNotification*)notification {
+	UITextField *textField = [notification object];
+	NSString *label = textField.text;
+	[self saveItemLabel];
+}
+
 #pragma mark Button Handlers
 
 - (IBAction)actionsButtonPressed:(id)sender {
@@ -97,12 +95,18 @@ enum TextViewActions {
         [self.actionSheet dismissWithClickedButtonIndex:-1 animated:NO];
     }
     
-	
     if (popoverController != nil) {
         [popoverController dismissPopoverAnimated:YES];
     }
     
     [actionSheet showFromBarButtonItem:actionsButton animated:YES];
+}
+
+- (IBAction)settingsButtonPressed:(id)sender {
+	SettingsTableViewController *stvc = [[SettingsTableViewController alloc] initWithNibName:@"SettingsTableViewController" bundle:nil];
+	self.popoverController = [[UIPopoverController alloc] initWithContentViewController:stvc];
+	[popoverController presentPopoverFromBarButtonItem:settingsButton permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+	[stvc release];
 }
 
 #pragma mark -
@@ -117,9 +121,50 @@ enum TextViewActions {
 #pragma mark -
 #pragma mark Managing the detail item
 
+- (void)setDetailItem:(BPItem*)_item {
+	self.item = _item;
+	self.title = item.name;
+	itemLabel.text = item.name;
+	self.textView.text = [item contents];
+	
+	if (popoverController != nil) {
+		[popoverController dismissPopoverAnimated:YES];
+	}
+	
+	[self editItemLabel];
+	
+}
+
+- (void)editItemLabel {
+	[UIView beginAnimations:nil context:nil];	
+	itemLabel.hidden = YES;
+	itemLabelTextField.text = itemLabel.text;	
+	itemLabelTextField.hidden = NO;
+	[itemLabelTextField becomeFirstResponder];
+	[UIView commitAnimations];	
+}
+
+- (void)saveItemLabel {
+	[UIView beginAnimations:nil context:nil];
+	itemLabel.text = itemLabelTextField.text;
+	itemLabelTextField.hidden = YES;
+	itemLabel.hidden = NO;
+	[UIView commitAnimations];
+}
+
+
+- (void)saveCurrentItem {
+	NSError *err;
+	BOOL saved = [[BPItemManager sharedInstance] saveItem:self.item withText:textView.text error:&err];
+	if (!saved) {
+		;
+	}
+}
+
 /*
  When setting the detail item, update the view and dismiss the popover controller if it's showing.
  */
+/*
 - (void)setDetailItem:(NSManagedObject *)managedObject {
     
 	if (detailItem != managedObject) {
@@ -134,13 +179,18 @@ enum TextViewActions {
         [popoverController dismissPopoverAnimated:YES];
     }		
 }
+*/
 
+#pragma mark -
+#pragma mark Text View delegate
 
-- (void)configureView {
-    // Update the user interface for the detail item.
-    detailDescriptionLabel.text = [[detailItem valueForKey:@"timeStamp"] description];
+- (void)textViewDidChange:(UITextView *)textView {
+	[self saveCurrentItem];	
 }
 
+- (void)textViewDidEndEditing:(UITextView *)textView {
+	NSLog(@"textViewDidEndEditing");
+}
 
 #pragma mark -
 #pragma mark Split view support
@@ -187,6 +237,16 @@ enum TextViewActions {
  // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
+	
+	itemLabelBarButtonItem.customView.backgroundColor = [UIColor clearColor];
+	itemLabel.backgroundColor = [UIColor clearColor];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(itemLabelTextFieldDidEndEditingNotification:)
+												 name:UITextFieldTextDidEndEditingNotification
+											   object:itemLabelTextField];
+	
+	
 	 self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
 															delegate:self
 												  cancelButtonTitle:nil
@@ -196,7 +256,8 @@ enum TextViewActions {
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											       selector:@selector(orientationDidChange:)
 													    name:@"UIDeviceOrientationDidChangeNotification"
-													  object:nil];    	
+													  object:nil];
+ 	textView.inputAccessoryView = keyboardAccessoryView;
 }
 
 
@@ -243,7 +304,6 @@ enum TextViewActions {
     [popoverController release];
     [toolbar release];
 	
-	[detailItem release];
 	[detailDescriptionLabel release];
     
 	[super dealloc];

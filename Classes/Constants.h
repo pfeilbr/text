@@ -7,20 +7,23 @@
  *
  */
 
-#define kAddNewFile 1
+#define kAddNewFile 0
 #define kAddNewFileFromTemplate 1
-#define kAddNewFolder 1
-#define kAddNewProject 1
+#define kAddNewFolder 1 
+#define kAddNewProject 2
 #define kAddNewProjectFromTemplate 1
 
 #define kActionEmail 1
 #define kActionCopyToClipboard 2
 
-#define kItemTypeFile @"file"
-#define kItemTypeFolder @"folder"
-#define kItemTypeProject @"project"
+#define kConfigBaseDirectoryName @"config"
+#define kConfigKeyboardAccessoryDefinitionsDirectoryName @"keyboard_accessory_definitions"
 
-typedef enum {
+//#define kItemTypeFile @"file"
+//#define kItemTypeFolder @"folder"
+//#define kItemTypeProject @"project"
+
+typedef enum tagItemType {
 	kItemTypeFile,
 	kItemTypeFolder,
 	kItemTypeProject

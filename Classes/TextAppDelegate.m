@@ -11,6 +11,7 @@
 
 #import "RootViewController.h"
 #import "DetailViewController.h"
+#import "BPConfig.h"
 
 
 @interface TextAppDelegate (CoreDataPrivate)
@@ -26,10 +27,20 @@
 @synthesize window, splitViewController, rootViewController, detailViewController;
 
 
+- (void)test {
+	NSDictionary *def = [[BPConfig sharedInstance] keyboardAccessoryDefinitionForType:@"html"];
+	NSLog(@"%@", def);
+}
+
 #pragma mark -
 #pragma mark Application lifecycle
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+	
+	// TODO: delete test
+	[self test];
+	
+	rootViewController.items = [[BPItemManager sharedInstance] rootItems];
     
     // Override point for customization after app launch    
     rootViewController.managedObjectContext = self.managedObjectContext;

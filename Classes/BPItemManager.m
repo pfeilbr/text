@@ -12,7 +12,6 @@ BPItemManager *sharedInstance = nil;
 
 @interface BPItemManager()
 - (NSString*)itemRootDirectory;
-- (void)load;
 @end
 
 
@@ -29,10 +28,29 @@ BPItemManager *sharedInstance = nil;
 	return [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
 }
 
-- (void)load {
+- (NSArray*)rootItems {
 	NSString *rootDirectory = [self itemRootDirectory];
+	return [self itemsForDirectoryAtPath:rootDirectory];
+}
+
+- (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath {
+	NSMutableArray *items = [[NSMutableArray alloc] init];
 	NSError *err;
-	NSArray *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:rootDirectory error:&err];
+	NSArray *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directoryAtPath error:&err];
+	for (NSString *fileName in contents) {
+		BPItem *item = [[[BPItem alloc] init] autorelease];
+		item.name = fileName;
+		item.path = [NSString stringWithFormat:@"%@/%@", directoryAtPath, fileName];
+		BOOL isDirectory;
+		[[NSFileManager defaultManager] fileExistsAtPath:item.path isDirectory:&isDirectory];
+		item.type = isDirectory ? kItemTypeFolder : kItemTypeFile;
+		[items addObject:item];
+	}
+	return items;
+}
+
+- (BOOL)saveItem:(BPItem*)item withText:(NSString*)text error:(NSError**)err {
+	return [text writeToFile:item.path atomically:YES encoding:NSUTF8StringEncoding error:err];
 }
 
 @end

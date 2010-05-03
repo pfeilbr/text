@@ -21,7 +21,7 @@
 
 @implementation RootViewController
 
-@synthesize detailViewController, fetchedResultsController, managedObjectContext, addButton, addActionSheet;
+@synthesize detailViewController, fetchedResultsController, managedObjectContext;
 
 
 #pragma mark -
@@ -43,35 +43,15 @@
         NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
         abort();
     }
-	
-	self.addActionSheet = [[UIActionSheet alloc] initWithTitle:nil
-												   delegate:self
-										  cancelButtonTitle:nil
-									 destructiveButtonTitle:nil
-										  otherButtonTitles:@"New File", @"New Folder", @"New Project", nil];
-	
+		
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(displayItem:) name:@"itemSelected" object:nil];
 }
 
-#pragma mark ActionSheet Delegate
-
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-	//NSString *fileName = [NSString stringWithString:@"<filename here>"];
-	//NSString *body = [NSString stringWithString:@"<body here>"];
-	
-	switch (buttonIndex) {
-		case 0:
-		{
-			break;
-		}
-		case 1:
-		{
-			break;
-		}
-		default:
-			break;
-	}
+- (void)displayItem:(NSNotification*)notification {
+	NSDictionary *dict = [[notification object] copy];
+	BPItem *item = [dict valueForKey:@"item"];
+	[detailViewController setDetailItem:item];
 }
-
 
 /*
 - (void)viewWillAppear:(BOOL)animated {
@@ -108,139 +88,7 @@
 
 
 #pragma mark -
-#pragma mark Button Handlers
-
-- (IBAction)addButtonPressed:(id)sender {
-
-	UIViewController *vc = [[UIViewController alloc] init];
-	[self.navigationController pushViewController:vc animated:YES];
-	[vc release];
-	
-	NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
-	NSError *err;
-	NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:&err];
-
-	return;
-	
-    if (self.addActionSheet.visible) {
-        [self.addActionSheet dismissWithClickedButtonIndex:-1 animated:NO];
-    }
-    
-	/*
-	 if (popoverController != nil) {
-	 [popoverController dismissPopoverAnimated:YES];
-	 }
-	 */
-    
-    [addActionSheet showFromBarButtonItem:addButton animated:YES];	
-}
-
-- (void)insertNewObject:(id)sender {
-    
-    NSIndexPath *currentSelection = [self.tableView indexPathForSelectedRow];
-    if (currentSelection != nil) {
-        [self.tableView deselectRowAtIndexPath:currentSelection animated:NO];
-    }    
-    
-    // Create a new instance of the entity managed by the fetched results controller.
-    NSManagedObjectContext *context = [fetchedResultsController managedObjectContext];
-    NSEntityDescription *entity = [[fetchedResultsController fetchRequest] entity];
-    NSManagedObject *newManagedObject = [NSEntityDescription insertNewObjectForEntityForName:[entity name] inManagedObjectContext:context];
-    
-    // If appropriate, configure the new managed object.
-    [newManagedObject setValue:[NSDate date] forKey:@"timeStamp"];
-    
-    // Save the context.
-    NSError *error = nil;
-    if (![context save:&error]) {
-        /*
-         Replace this implementation with code to handle the error appropriately.
-         
-         abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development. If it is not possible to recover from the error, display an alert panel that instructs the user to quit the application by pressing the Home button.
-         */
-        NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-        abort();
-    }
-    
-    NSIndexPath *insertionPath = [fetchedResultsController indexPathForObject:newManagedObject];
-    [self.tableView selectRowAtIndexPath:insertionPath animated:YES scrollPosition:UITableViewScrollPositionTop];
-    detailViewController.detailItem = newManagedObject;
-}
-
-
-#pragma mark -
 #pragma mark Table view data source
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return [[fetchedResultsController sections] count];
-}
-
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    id <NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController sections] objectAtIndex:section];
-    return [sectionInfo numberOfObjects];
-}
-
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    static NSString *CellIdentifier = @"Cell";
-    
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-    }
-    
-    // Configure the cell.
-    [self configureCell:cell atIndexPath:indexPath];
-    
-    return cell;
-}
-
-
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        
-        // Delete the managed object.
-        NSManagedObject *objectToDelete = [fetchedResultsController objectAtIndexPath:indexPath];
-        if (detailViewController.detailItem == objectToDelete) {
-            detailViewController.detailItem = nil;
-        }
-        
-        NSManagedObjectContext *context = [fetchedResultsController managedObjectContext];
-        [context deleteObject:objectToDelete];
-        
-        NSError *error;
-        if (![context save:&error]) {
-            /*
-             Replace this implementation with code to handle the error appropriately.
-             
-             abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development. If it is not possible to recover from the error, display an alert panel that instructs the user to quit the application by pressing the Home button.
-             */
-            NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-            abort();
-        }
-    }   
-}
-
-
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // The table view should not be re-orderable.
-    return NO;
-}
-
-
-#pragma mark -
-#pragma mark Table view delegate
-
-- (void)tableView:(UITableView *)aTableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    // Set the detail item in the detail view controller.
-    NSManagedObject *selectedObject = [[self fetchedResultsController] objectAtIndexPath:indexPath];
-    detailViewController.detailItem = selectedObject;    
-}
-
 
 #pragma mark -
 #pragma mark Fetched results controller

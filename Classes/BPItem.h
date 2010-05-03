@@ -10,7 +10,15 @@
 
 
 @interface BPItem : NSObject {
-
+	NSString *name;
+	NSString *path;
+	ItemType type;
 }
+
+@property(nonatomic, copy) NSString *name;
+@property(nonatomic, copy) NSString *path;
+@property ItemType type;
+
+- (NSString*)contents;
 
 @end
