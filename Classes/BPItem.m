@@ -18,4 +18,8 @@
 	return [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&err];
 }
 
+- (BOOL)isEqualToItem:(BPItem*)item {
+	return [path isEqualToString:item.path];
+}
+
 @end

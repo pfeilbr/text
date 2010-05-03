@@ -8,6 +8,7 @@
 
 #import "DetailViewController.h"
 #import "RootViewController.h"
+#import "TextAppDelegate.h"
 
 enum TextViewActions {
 	EMAIL,
@@ -17,6 +18,10 @@ enum TextViewActions {
 
 @interface DetailViewController ()
 @property (nonatomic, retain) UIPopoverController *popoverController;
+- (void)editItemLabel;
+- (void)saveItemLabel;
+- (void)renameItem;
+- (void)clear;
 @end
 
 
@@ -83,9 +88,41 @@ enum TextViewActions {
 }
 
 - (void)itemLabelTextFieldDidEndEditingNotification:(NSNotification*)notification {
-	UITextField *textField = [notification object];
-	NSString *label = textField.text;
+	//UITextField *textField = [notification object];
+	//NSString *label = textField.text;
+	[self renameItem];
+}
+
+- (void)itemDeletedNotification:(NSNotification*)notification {
+	BPItem *_item = [[notification object] valueForKey:kKeyItem];
+	if ([self.item isEqualToItem:_item]) {
+		[self clear];
+	}
+}
+
+- (void)clear {
+	self.item = nil;
+	itemLabel.text = @"";
+	textView.text = @"";
+	textView.editable = NO;
+}
+
+- (void)renameItem {
 	[self saveItemLabel];
+	NSString *toPath = [[BPItemManager sharedInstance].currentDisplayedDirectoryPath stringByAppendingPathComponent:itemLabel.text];
+	BPItem *_item = [[BPItemManager sharedInstance] renameFileItemFromPath:item.path toPath:toPath];
+	[self setDetailItem:_item];
+	
+	TextAppDelegate *ad = [UIApplication sharedApplication].delegate;
+	[ad.rootViewController selectItem:_item];
+}
+
+- (void)addNewFile {
+	[self saveCurrentItem];
+	BPItem *_item = [[BPItemManager sharedInstance] createDefaultFileItemAtCurrentDisplayedDirectoryPath];
+	[self setDetailItem:_item];
+	[self editItemLabel];
+
 }
 
 #pragma mark Button Handlers
@@ -125,14 +162,13 @@ enum TextViewActions {
 	self.item = _item;
 	self.title = item.name;
 	itemLabel.text = item.name;
-	self.textView.text = [item contents];
+	itemLabelTextField.text = item.name;
+	textView.editable = YES;
+	textView.text = [item contents];
 	
 	if (popoverController != nil) {
 		[popoverController dismissPopoverAnimated:YES];
 	}
-	
-	[self editItemLabel];
-	
 }
 
 - (void)editItemLabel {
@@ -154,6 +190,9 @@ enum TextViewActions {
 
 
 - (void)saveCurrentItem {
+	if (item == nil) {
+		return;
+	}
 	NSError *err;
 	BOOL saved = [[BPItemManager sharedInstance] saveItem:self.item withText:textView.text error:&err];
 	if (!saved) {
@@ -246,6 +285,13 @@ enum TextViewActions {
 												 name:UITextFieldTextDidEndEditingNotification
 											   object:itemLabelTextField];
 	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(itemDeletedNotification:)
+												 name:BPItemDeletedNotification
+											   object:nil];	
+	
+	
+	
 	
 	 self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
 															delegate:self
@@ -258,6 +304,8 @@ enum TextViewActions {
 													    name:@"UIDeviceOrientationDidChangeNotification"
 													  object:nil];
  	textView.inputAccessoryView = keyboardAccessoryView;
+	
+	[self clear];
 }
 
 

@@ -7,6 +7,12 @@
  *
  */
 
+#define kKeyItem @"item"
+
+#define BPItemSelectedNotification @"BPItemSelectedNotification"
+#define BPAddNewFileNotification @"BPAddNewFileNotification"
+#define BPItemDeletedNotification @"BPItemDeletedNotification"
+
 #define kAddNewFile 0
 #define kAddNewFileFromTemplate 1
 #define kAddNewFolder 1 
@@ -18,6 +24,7 @@
 
 #define kConfigBaseDirectoryName @"config"
 #define kConfigKeyboardAccessoryDefinitionsDirectoryName @"keyboard_accessory_definitions"
+
 
 //#define kItemTypeFile @"file"
 //#define kItemTypeFolder @"folder"

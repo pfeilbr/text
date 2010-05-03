@@ -20,5 +20,6 @@
 @property ItemType type;
 
 - (NSString*)contents;
+- (BOOL)isEqualToItem:(BPItem*)item;
 
 @end

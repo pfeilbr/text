@@ -47,6 +47,7 @@
 
 - (void)setDetailItem:(BPItem*)item;
 - (void)saveCurrentItem;
+- (void)addNewFile;
 - (void)editItemLabel;
 - (IBAction)actionsButtonPressed:(id)sender;
 - (IBAction)settingsButtonPressed:(id)sender;

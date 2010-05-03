@@ -12,7 +12,7 @@
 
 @class DetailViewController;
 
-@interface RootViewController : ItemTableViewController <NSFetchedResultsControllerDelegate> {
+@interface RootViewController : ItemTableViewController <NSFetchedResultsControllerDelegate, UINavigationControllerDelegate> {
 	DetailViewController *detailViewController;
 	NSFetchedResultsController *fetchedResultsController;
 	NSManagedObjectContext *managedObjectContext;

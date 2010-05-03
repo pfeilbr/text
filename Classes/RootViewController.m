@@ -15,6 +15,8 @@
 
 @interface RootViewController ()
 - (void)configureCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath;
+- (void)displayItem:(NSNotification*)notification;
+- (void)addNewFile:(NSNotification*)notification;
 @end
 
 
@@ -44,7 +46,15 @@
         abort();
     }
 		
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(displayItem:) name:@"itemSelected" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(displayItem:) name:BPItemSelectedNotification object:nil];
+	
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+													selector:@selector(addNewFile:)
+														name:BPAddNewFileNotification
+														object:nil];
+	
+	
 }
 
 - (void)displayItem:(NSNotification*)notification {
@@ -52,6 +62,14 @@
 	BPItem *item = [dict valueForKey:@"item"];
 	[detailViewController setDetailItem:item];
 }
+
+- (void)addNewFile:(NSNotification*)notification {
+	//NSDictionary *dict = [[notification object] copy];
+	//BPItem *item = [dict valueForKey:@"item"];
+	//[detailViewController setDetailItem:item];
+	[detailViewController addNewFile];
+}
+
 
 /*
 - (void)viewWillAppear:(BOOL)animated {
@@ -81,7 +99,6 @@
 
 
 - (void)configureCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath {
-    
     NSManagedObject *managedObject = [fetchedResultsController objectAtIndexPath:indexPath];
     cell.textLabel.text = [[managedObject valueForKey:@"timeStamp"] description];
 }
@@ -131,6 +148,13 @@
     return fetchedResultsController;
 }    
 
+#pragma mark -
+#pragma mark UINavigationBarDelegate
+
+- (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+	ItemTableViewController *itvc = (ItemTableViewController*)viewController;
+	[BPItemManager sharedInstance].currentDisplayedDirectoryPath = itvc.currentDirectoryPath;
+}
 
 #pragma mark -
 #pragma mark Fetched results controller delegate

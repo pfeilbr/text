@@ -12,15 +12,17 @@
 
 
 @interface ItemTableViewController : UITableViewController<UIActionSheetDelegate> {
-	NSArray *items;
 	UIBarButtonItem *addButton;	
 	UIActionSheet *addActionSheet;	
+	NSString *currentDirectoryPath;
 }
 
-@property(nonatomic, retain) NSArray *items;
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *addButton;
 @property (nonatomic, retain) IBOutlet UIActionSheet *addActionSheet;
+@property(nonatomic, copy) NSString *currentDirectoryPath;
 
 - (IBAction)addButtonPressed:(id)sender;
+- (void)reload;
+- (void)selectItem:(BPItem*)item;
 
 @end

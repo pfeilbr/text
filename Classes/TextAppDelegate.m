@@ -40,7 +40,7 @@
 	// TODO: delete test
 	[self test];
 	
-	rootViewController.items = [[BPItemManager sharedInstance] rootItems];
+	rootViewController.currentDirectoryPath = [BPItemManager sharedInstance].currentDisplayedDirectoryPath;
     
     // Override point for customization after app launch    
     rootViewController.managedObjectContext = self.managedObjectContext;

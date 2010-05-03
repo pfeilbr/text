@@ -11,7 +11,7 @@
 
 @implementation ItemTableViewController
 
-@synthesize items, addButton, addActionSheet;
+@synthesize addButton, addActionSheet, currentDirectoryPath;
 
 #pragma mark -
 #pragma mark View lifecycle
@@ -37,9 +37,10 @@
 
 /*
 - (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
+	[super viewWillAppear:animated];
 }
 */
+
 /*
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
@@ -67,14 +68,13 @@
 #pragma mark Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    // Return the number of sections.
     return 1;
 }
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    // Return the number of rows in the section.
-    return [items count];
+	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];
+    return [_items count];
 }
 
 
@@ -87,9 +87,9 @@
     if (cell == nil) {
         cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
     }
-    
-    // Configure the cell...
-	BPItem *item = [items objectAtIndex:indexPath.row];
+
+	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];
+	BPItem *item = [_items objectAtIndex:indexPath.row];
 	cell.textLabel.text = item.name;
     
     return cell;
@@ -105,19 +105,22 @@
 */
 
 
-/*
+
 // Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {    
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:YES];
-    }   
-    else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+		NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];
+		BPItem *item = [_items objectAtIndex:indexPath.row];
+		[[BPItemManager sharedInstance] deleteItem:item];
+		[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:YES];
+
+		NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+		[dict setObject:item forKey:kKeyItem];
+		[[NSNotificationCenter defaultCenter] postNotificationName:BPItemDeletedNotification object:dict];
     }   
 }
-*/
+
 
 
 /*
@@ -140,22 +143,23 @@
 #pragma mark Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	BPItem *item = [items objectAtIndex:indexPath.row];
+	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];
+	BPItem *item = [_items objectAtIndex:indexPath.row];
 	
 	switch (item.type) {
 		case kItemTypeFile:
 		{
 			NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-			[dict setObject:item forKey:@"item"];
-			[[NSNotificationCenter defaultCenter] postNotificationName:@"itemSelected" object:dict];
+			[dict setObject:item forKey:kKeyItem];
+			[[NSNotificationCenter defaultCenter] postNotificationName:BPItemSelectedNotification object:dict];
 			break;
 		}
 		case kItemTypeFolder:
 		{
 			ItemTableViewController *itvc = [[ItemTableViewController alloc] initWithNibName:@"ItemTableViewController" bundle:nil];
 			itvc.title = item.name;
-			itvc.items = [[BPItemManager sharedInstance] itemsForDirectoryAtPath:item.path];
-			[self.navigationController pushViewController:itvc animated:YES];			
+			itvc.currentDirectoryPath = [[BPItemManager sharedInstance] pushDirectoryName:item.name];
+			[self.navigationController pushViewController:itvc animated:YES];	
 			[itvc release];
 			break;
 		}
@@ -164,6 +168,32 @@
 			break;
 		}
 	}
+}
+
+#pragma mark Item Manipulation
+
+- (void)reload {
+	[self.tableView reloadData];
+}
+
+- (void)selectItem:(BPItem*)item {
+	[self reload];
+	NSIndexPath *indexPath = [self indexPathForItem:item];
+	[self.tableView selectRowAtIndexPath:indexPath animated:YES scrollPosition:UITableViewScrollPositionTop];
+}
+
+- (NSIndexPath*)indexPathForItem:(BPItem*)item {
+	int rowIndex = -1;
+	int counter = 0;
+	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];	
+	for (BPItem *i in _items) {
+		if ([i isEqualToItem:item]) {
+			rowIndex = counter;
+		}
+		counter++;
+	}
+	NSIndexPath *indexPath = [NSIndexPath indexPathForRow:rowIndex inSection:0];
+	return indexPath;
 }
 
 #pragma mark -
@@ -198,11 +228,11 @@
 #pragma mark ActionSheet Delegate
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-	
 	switch (buttonIndex) {
 		case kAddNewFile:
 		{
-			NSLog(@"kAddNewFile");
+			NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+			[[NSNotificationCenter defaultCenter] postNotificationName:BPAddNewFileNotification object:dict];			
 			break;
 		}
 		case kAddNewFolder:

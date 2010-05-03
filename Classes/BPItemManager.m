@@ -17,6 +17,15 @@ BPItemManager *sharedInstance = nil;
 
 @implementation BPItemManager
 
+@synthesize currentDisplayedDirectoryPath;
+
+- (id)init {
+	if (self = [super init]) {
+		self.currentDisplayedDirectoryPath = [self itemRootDirectory];
+	}
+	return self;
+}
+
 + (BPItemManager*)sharedInstance {
 	if (sharedInstance == nil) {
 		sharedInstance = [[[self class] alloc] init];
@@ -49,8 +58,82 @@ BPItemManager *sharedInstance = nil;
 	return items;
 }
 
+- (NSArray*)itemsForCurrentDisplayedDirectoryPath {
+	return [self itemsForDirectoryAtPath:currentDisplayedDirectoryPath];
+}
+
+- (BPItem*)createFileItemWithFileName:(NSString*)fileName atDirectoryPath:(NSString*)directoryPath {
+	NSString *filePath = [NSString stringWithFormat:@"%@/%@", directoryPath, fileName];
+	NSData *data = [NSData data];
+	BOOL fileCreated = [[NSFileManager defaultManager] createFileAtPath:filePath contents:data attributes:nil];
+	BPItem *item = nil;
+	if (fileCreated) {
+		item = [[BPItem alloc] init];
+		item.name = fileName;
+		item.path = [NSString stringWithFormat:@"%@/%@", directoryPath, fileName];
+		item.type = kItemTypeFile;
+	}
+	return item;
+}
+
+- (BPItem*)fileItemFromPath:(NSString*)path {
+	BPItem *item = nil;
+	BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
+	if (fileExists) {
+		item = [[BPItem alloc] init];
+		item.name = [path lastPathComponent];
+		item.path = path;
+		item.type = kItemTypeFile;
+	}
+	return item;	
+}
+
+- (BPItem*)createDefaultFileItemAtCurrentDisplayedDirectoryPath {
+	NSString *fileName = [self nextDefaultFileNameForCurrentDisplayedDirectoryPath];
+	return [self createFileItemWithFileName:fileName atDirectoryPath:currentDisplayedDirectoryPath];
+}
+
 - (BOOL)saveItem:(BPItem*)item withText:(NSString*)text error:(NSError**)err {
 	return [text writeToFile:item.path atomically:YES encoding:NSUTF8StringEncoding error:err];
+}
+
+- (BOOL)deleteItem:(BPItem*)item {
+	NSError *err;
+	return [[NSFileManager defaultManager] removeItemAtPath:item.path error:&err];
+}
+
+- (NSString*)pushDirectoryName:(NSString*)directoryName {
+	self.currentDisplayedDirectoryPath = [self.currentDisplayedDirectoryPath stringByAppendingPathComponent:directoryName];
+	return currentDisplayedDirectoryPath;
+}
+
+- (NSString*)popDirectoryName {
+	self.currentDisplayedDirectoryPath = [currentDisplayedDirectoryPath stringByDeletingLastPathComponent];
+	return currentDisplayedDirectoryPath;
+}
+
+- (NSString*)nextDefaultFileNameAtDirectoryPath:(NSString*)directoryPath {
+	BOOL foundUnusedFileName = NO;
+	int counter = 1;
+	NSString *currentPath = nil;
+	NSString *currentFileName = nil;
+	while (!foundUnusedFileName) {
+		currentFileName = [NSString stringWithFormat:@"%@%d.txt", @"file", counter++];
+		currentPath = [NSString stringWithFormat:@"%@/%@", directoryPath, currentFileName];
+		foundUnusedFileName = ![[NSFileManager defaultManager] fileExistsAtPath:currentPath];
+	}
+	
+	return currentFileName;
+}
+
+- (NSString*)nextDefaultFileNameForCurrentDisplayedDirectoryPath {
+	return [self nextDefaultFileNameAtDirectoryPath:currentDisplayedDirectoryPath];
+}
+
+- (BPItem*)renameFileItemFromPath:(NSString*)fromPath toPath:(NSString*)toPath {
+	NSError *err;
+	[[NSFileManager defaultManager] moveItemAtPath:fromPath toPath:toPath error:&err];
+	return [self fileItemFromPath:toPath];
 }
 
 @end
