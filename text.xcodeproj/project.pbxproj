@@ -52,6 +52,8 @@
 		C534D9D1118F006C001A4856 /* BPConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = C534D9D0118F006C001A4856 /* BPConfig.m */; };
 		C534DA0F118F02E3001A4856 /* www in Resources */ = {isa = PBXBuildFile; fileRef = C534DA00118F02E3001A4856 /* www */; };
 		C534DA1B118F03E9001A4856 /* config in Resources */ = {isa = PBXBuildFile; fileRef = C534DA14118F03E9001A4856 /* config */; };
+		C537AB6F11904507005EC707 /* NewItemViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C537AB6D11904507005EC707 /* NewItemViewController.m */; };
+		C537AB7011904507005EC707 /* NewItemViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = C537AB6E11904507005EC707 /* NewItemViewController.xib */; };
 		C599DB4F118915DC006E9CB3 /* BPTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = C599DB4E118915DC006E9CB3 /* BPTextView.m */; };
 		C599DB731189B5BC006E9CB3 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C599DB721189B5BC006E9CB3 /* MessageUI.framework */; };
 		C599DC381189FE14006E9CB3 /* BPItemManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C599DC371189FE14006E9CB3 /* BPItemManager.m */; };
@@ -138,6 +140,9 @@
 		C534D9D0118F006C001A4856 /* BPConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BPConfig.m; sourceTree = "<group>"; };
 		C534DA00118F02E3001A4856 /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
 		C534DA14118F03E9001A4856 /* config */ = {isa = PBXFileReference; lastKnownFileType = folder; path = config; sourceTree = "<group>"; };
+		C537AB6C11904507005EC707 /* NewItemViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewItemViewController.h; sourceTree = "<group>"; };
+		C537AB6D11904507005EC707 /* NewItemViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewItemViewController.m; sourceTree = "<group>"; };
+		C537AB6E11904507005EC707 /* NewItemViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewItemViewController.xib; sourceTree = "<group>"; };
 		C599DB4D118915DC006E9CB3 /* BPTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BPTextView.h; sourceTree = "<group>"; };
 		C599DB4E118915DC006E9CB3 /* BPTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BPTextView.m; sourceTree = "<group>"; };
 		C599DB721189B5BC006E9CB3 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
@@ -195,6 +200,9 @@
 				C534D99C118E4EC8001A4856 /* SettingsTableViewController.xib */,
 				C534D9CF118F006C001A4856 /* BPConfig.h */,
 				C534D9D0118F006C001A4856 /* BPConfig.m */,
+				C537AB6C11904507005EC707 /* NewItemViewController.h */,
+				C537AB6D11904507005EC707 /* NewItemViewController.m */,
+				C537AB6E11904507005EC707 /* NewItemViewController.xib */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -397,6 +405,7 @@
 				C534D99E118E4EC8001A4856 /* SettingsTableViewController.xib in Resources */,
 				C534DA0F118F02E3001A4856 /* www in Resources */,
 				C534DA1B118F03E9001A4856 /* config in Resources */,
+				C537AB7011904507005EC707 /* NewItemViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,6 +450,7 @@
 				C534D810118BA7F0001A4856 /* ItemTableViewController.m in Sources */,
 				C534D99D118E4EC8001A4856 /* SettingsTableViewController.m in Sources */,
 				C534D9D1118F006C001A4856 /* BPConfig.m in Sources */,
+				C537AB6F11904507005EC707 /* NewItemViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

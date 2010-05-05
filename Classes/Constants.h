@@ -10,8 +10,12 @@
 #define kKeyItem @"item"
 
 #define BPItemSelectedNotification @"BPItemSelectedNotification"
+#define BPSelectItemInItemListNotification @"BPSelectItemInItemListNotification"
 #define BPAddNewFileNotification @"BPAddNewFileNotification"
+#define BPAddNewFolderNotification @"BPAddNewFolderNotification"
 #define BPItemDeletedNotification @"BPItemDeletedNotification"
+
+#define BPAddNewFolderTitle @"Folder Name"
 
 #define kAddNewFile 0
 #define kAddNewFileFromTemplate 1

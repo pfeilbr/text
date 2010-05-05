@@ -22,4 +22,16 @@
 	return [path isEqualToString:item.path];
 }
 
+- (NSComparisonResult)compare:(BPItem*)item {
+	if (self.type == item.type) {
+		return [self.name compare:item.name options:NSCaseInsensitiveSearch];
+	} else {
+		if (self.type == kItemTypeFolder) {
+			return NSOrderedAscending;
+		} else {
+			return NSOrderedDescending;
+		}
+	}
+}
+
 @end

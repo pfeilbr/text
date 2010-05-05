@@ -21,5 +21,6 @@
 
 - (NSString*)contents;
 - (BOOL)isEqualToItem:(BPItem*)item;
+- (NSComparisonResult)compare:(BPItem*)item;
 
 @end

@@ -46,7 +46,10 @@
         abort();
     }
 		
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(displayItem:) name:BPItemSelectedNotification object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+													selector:@selector(displayItem:)
+														 name:BPItemSelectedNotification
+													   object:nil];
 	
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
@@ -54,22 +57,42 @@
 														name:BPAddNewFileNotification
 														object:nil];
 	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(addNewFolder:)
+												 name:BPAddNewFolderNotification
+											   object:nil];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(selectItemInList:)
+												 name:BPSelectItemInItemListNotification
+											   object:nil];
+	
+	
 	
 }
 
 - (void)displayItem:(NSNotification*)notification {
 	NSDictionary *dict = [[notification object] copy];
-	BPItem *item = [dict valueForKey:@"item"];
+	BPItem *item = [dict valueForKey:kKeyItem];
 	[detailViewController setDetailItem:item];
 }
 
 - (void)addNewFile:(NSNotification*)notification {
-	//NSDictionary *dict = [[notification object] copy];
-	//BPItem *item = [dict valueForKey:@"item"];
-	//[detailViewController setDetailItem:item];
-	[detailViewController addNewFile];
+	[detailViewController addNewFile:notification];
 }
 
+- (void)addNewFolder:(NSNotification*)notification {
+	[detailViewController addNewFolder:notification];	
+}
+
+- (void)selectItemInList:(NSNotification*)notification {
+	NSDictionary *dict = [[notification object] copy];
+	BPItem *item = [dict valueForKey:kKeyItem];
+	
+	//ItemTableViewController *itvc = (ItemTableViewController*)[self visibleViewController];
+	ItemTableViewController *itvc = (ItemTableViewController*)super.navigationController.topViewController;
+	[itvc selectItem:item];
+}
 
 /*
 - (void)viewWillAppear:(BOOL)animated {
@@ -178,6 +201,9 @@
     }
 }
 
+- (UIViewController*)visibleViewController {
+	return	super.navigationController.visibleViewController;
+}
 
 - (void)controller:(NSFetchedResultsController *)controller didChangeObject:(id)anObject
        atIndexPath:(NSIndexPath *)indexPath forChangeType:(NSFetchedResultsChangeType)type

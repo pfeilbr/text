@@ -60,36 +60,16 @@ enum TextViewActions {
 		default:
 			break;
 	}
-    if (buttonIndex	== 0) {
-        // email request details
-		/*
-        MFMailComposeViewController *vc = [[MFMailComposeViewController alloc] init];
-        vc.mailComposeDelegate = self;		
-        [vc setSubject:[NSString stringWithFormat:@"HTTP Request: %@", request.name]];        
-        [vc setMessageBody:[request toEmail] isHTML:NO];
-        vc.modalPresentationStyle = UIModalPresentationPageSheet;
-        [self presentModalViewController:vc animated:YES];
-        [vc release];        
-		 */
-    } else if (buttonIndex == 1) {
-        // copy curl command
-       /* 
-		*/
-    }
 }
 
 #pragma mark -
 #pragma mark Managing the detail item
 
 - (void)orientationDidChange:(NSNotification *)notification {
-	// reload the table view to correct UILabel widths
-	//[NSTimer scheduledTimerWithTimeInterval:0.25 target:self.tableView selector:@selector(reloadData) userInfo:nil repeats:NO];
-	//[NSTimer scheduledTimerWithTimeInterval:0.25 target:self selector:@selector(resizePerformRequestButton) userInfo:nil repeats:NO];
 }
 
 - (void)itemLabelTextFieldDidEndEditingNotification:(NSNotification*)notification {
 	//UITextField *textField = [notification object];
-	//NSString *label = textField.text;
 	[self renameItem];
 }
 
@@ -104,8 +84,11 @@ enum TextViewActions {
 	self.item = nil;
 	itemLabel.text = @"";
 	textView.text = @"";
-	textView.editable = NO;
+	textView.hidden = YES;
 }
+
+#pragma mark -
+#pragma mark Item Management
 
 - (void)renameItem {
 	[self saveItemLabel];
@@ -113,17 +96,27 @@ enum TextViewActions {
 	BPItem *_item = [[BPItemManager sharedInstance] renameFileItemFromPath:item.path toPath:toPath];
 	[self setDetailItem:_item];
 	
-	TextAppDelegate *ad = [UIApplication sharedApplication].delegate;
-	[ad.rootViewController selectItem:_item];
+	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObject:_item forKey:kKeyItem];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BPSelectItemInItemListNotification object:dict];	
 }
 
-- (void)addNewFile {
+- (void)addNewFile:(NSNotification*)notification {
 	[self saveCurrentItem];
 	BPItem *_item = [[BPItemManager sharedInstance] createDefaultFileItemAtCurrentDisplayedDirectoryPath];
 	[self setDetailItem:_item];
 	[self editItemLabel];
-
 }
+
+- (void)addNewFolder:(NSNotification*)notification {
+	[self saveCurrentItem];
+	NewItemViewController *nivc = [[NewItemViewController alloc] initWithNibName:@"NewItemViewController" bundle:nil];
+	nivc.modalPresentationStyle = UIModalPresentationFormSheet;
+	nivc.titleText = BPAddNewFolderTitle;
+	nivc.inputValueText = [[BPItemManager sharedInstance] nextDefaultFolderNameForCurrentDisplayedDirectoryPath];
+	[self presentModalViewController:nivc animated:YES];
+	[nivc release];
+}
+
 
 #pragma mark Button Handlers
 
@@ -163,29 +156,29 @@ enum TextViewActions {
 	self.title = item.name;
 	itemLabel.text = item.name;
 	itemLabelTextField.text = item.name;
-	textView.editable = YES;
 	textView.text = [item contents];
-	
+	textView.hidden = NO;
+		
 	if (popoverController != nil) {
 		[popoverController dismissPopoverAnimated:YES];
 	}
 }
 
 - (void)editItemLabel {
-	[UIView beginAnimations:nil context:nil];	
+	//[UIView beginAnimations:nil context:nil];	
 	itemLabel.hidden = YES;
-	itemLabelTextField.text = itemLabel.text;	
 	itemLabelTextField.hidden = NO;
-	[itemLabelTextField becomeFirstResponder];
-	[UIView commitAnimations];	
+	[itemLabelTextField becomeFirstResponder];	
+	itemLabelTextField.text = itemLabel.text;	
+	//[UIView commitAnimations];	
 }
 
 - (void)saveItemLabel {
-	[UIView beginAnimations:nil context:nil];
+	//[UIView beginAnimations:nil context:nil];
 	itemLabel.text = itemLabelTextField.text;
 	itemLabelTextField.hidden = YES;
 	itemLabel.hidden = NO;
-	[UIView commitAnimations];
+	//[UIView commitAnimations];
 }
 
 

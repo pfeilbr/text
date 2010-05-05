@@ -19,27 +19,22 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    // Uncomment the following line to preserve selection between presentations.
-    self.clearsSelectionOnViewWillAppear = NO;
- 
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+	self.clearsSelectionOnViewWillAppear = NO;
 	self.addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonPressed:)];
 	self.navigationItem.rightBarButtonItem = addButton;
-	
 	self.addActionSheet = [[UIActionSheet alloc] initWithTitle:nil
 													  delegate:self
 											 cancelButtonTitle:nil
 										destructiveButtonTitle:nil
 											 otherButtonTitles:@"New File", @"New Folder", @"New Project", nil];
-	
 }
 
-/*
 - (void)viewWillAppear:(BOOL)animated {
+	NSLog(@"%s", __PRETTY_FUNCTION__);
+	[BPItemManager sharedInstance].currentDisplayedDirectoryPath = self.currentDirectoryPath;
+	[self reload];
 	[super viewWillAppear:animated];
 }
-*/
 
 /*
 - (void)viewDidAppear:(BOOL)animated {
@@ -68,11 +63,13 @@
 #pragma mark Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+	NSLog(@"%s", __PRETTY_FUNCTION__);
     return 1;
 }
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+	NSLog(@"%s", __PRETTY_FUNCTION__);
 	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];
     return [_items count];
 }
@@ -91,6 +88,7 @@
 	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];
 	BPItem *item = [_items objectAtIndex:indexPath.row];
 	cell.textLabel.text = item.name;
+	cell.accessoryType = (item.type == kItemTypeFolder) ?  UITableViewCellAccessoryDisclosureIndicator :  UITableViewCellAccessoryNone;
     
     return cell;
 }
@@ -237,6 +235,8 @@
 		}
 		case kAddNewFolder:
 		{
+			NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+			[[NSNotificationCenter defaultCenter] postNotificationName:BPAddNewFolderNotification object:dict];			
 			break;
 		}
 		case kAddNewProject:

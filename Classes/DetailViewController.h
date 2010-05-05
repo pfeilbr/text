@@ -13,6 +13,7 @@
 #import "BPTextView.h"
 #import "BPItem.h"
 #import "SettingsTableViewController.h"
+#import "NewItemViewController.h"
 
 @class RootViewController;
 
@@ -47,7 +48,8 @@
 
 - (void)setDetailItem:(BPItem*)item;
 - (void)saveCurrentItem;
-- (void)addNewFile;
+- (void)addNewFile:(NSNotification*)notification;
+- (void)addNewFolder:(NSNotification*)notification;
 - (void)editItemLabel;
 - (IBAction)actionsButtonPressed:(id)sender;
 - (IBAction)settingsButtonPressed:(id)sender;

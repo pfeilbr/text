@@ -55,6 +55,7 @@ BPItemManager *sharedInstance = nil;
 		item.type = isDirectory ? kItemTypeFolder : kItemTypeFile;
 		[items addObject:item];
 	}
+	[items sortUsingSelector:@selector(compare:)];
 	return items;
 }
 
@@ -72,6 +73,19 @@ BPItemManager *sharedInstance = nil;
 		item.name = fileName;
 		item.path = [NSString stringWithFormat:@"%@/%@", directoryPath, fileName];
 		item.type = kItemTypeFile;
+	}
+	return item;
+}
+
+- (BPItem*)createFolderItemWithFolderName:(NSString*)folderName atDirectoryPath:(NSString*)directoryPath {
+	NSString *fullDirectoryPath = [NSString stringWithFormat:@"%@/%@", directoryPath, folderName];
+	BOOL directoryCreated = [[NSFileManager defaultManager] createDirectoryAtPath:fullDirectoryPath attributes:nil];
+	BPItem *item = nil;
+	if (directoryCreated) {
+		item = [[BPItem alloc] init];
+		item.name = folderName;
+		item.path = fullDirectoryPath;
+		item.type = kItemTypeFolder;
 	}
 	return item;
 }
@@ -129,6 +143,27 @@ BPItemManager *sharedInstance = nil;
 - (NSString*)nextDefaultFileNameForCurrentDisplayedDirectoryPath {
 	return [self nextDefaultFileNameAtDirectoryPath:currentDisplayedDirectoryPath];
 }
+
+- (NSString*)nextDefaultFolderNameAtDirectoryPath:(NSString*)directoryPath {
+	BOOL foundUnusedFileName = NO;
+	int counter = 1;
+	NSString *currentPath = nil;
+	NSString *currentFileName = nil;
+	while (!foundUnusedFileName) {
+		currentFileName = [NSString stringWithFormat:@"%@%d", @"folder", counter++];
+		currentPath = [NSString stringWithFormat:@"%@/%@", directoryPath, currentFileName];
+		BOOL isDirectory;
+		BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:currentPath isDirectory:&isDirectory];
+		foundUnusedFileName = !exists || (exists && !isDirectory);
+	}
+	
+	return currentFileName;
+}
+
+- (NSString*)nextDefaultFolderNameForCurrentDisplayedDirectoryPath {
+	return [self nextDefaultFolderNameAtDirectoryPath:currentDisplayedDirectoryPath];
+}
+
 
 - (BPItem*)renameFileItemFromPath:(NSString*)fromPath toPath:(NSString*)toPath {
 	NSError *err;

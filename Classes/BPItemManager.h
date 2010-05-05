@@ -31,6 +31,10 @@
 - (NSString*)nextDefaultFileNameAtDirectoryPath:(NSString*)directoryPath;
 - (NSString*)nextDefaultFileNameForCurrentDisplayedDirectoryPath;
 
+- (NSString*)nextDefaultFolderNameAtDirectoryPath:(NSString*)directoryPath;
+- (NSString*)nextDefaultFolderNameForCurrentDisplayedDirectoryPath;
+- (BPItem*)createFolderItemWithFolderName:(NSString*)folderName atDirectoryPath:(NSString*)directoryPath;
+
 - (BPItem*)createDefaultFileItemAtCurrentDisplayedDirectoryPath;
 - (BPItem*)renameFileItemFromPath:(NSString*)fromPath toPath:(NSString*)toPath;
 
