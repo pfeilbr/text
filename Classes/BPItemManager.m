@@ -43,25 +43,38 @@ BPItemManager *sharedInstance = nil;
 }
 
 - (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath {
-	NSMutableArray *items = [[NSMutableArray alloc] init];
-	NSError *err;
-	NSArray *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directoryAtPath error:&err];
-	for (NSString *fileName in contents) {
-		BPItem *item = [[[BPItem alloc] init] autorelease];
-		item.name = fileName;
-		item.path = [NSString stringWithFormat:@"%@/%@", directoryAtPath, fileName];
-		BOOL isDirectory;
-		[[NSFileManager defaultManager] fileExistsAtPath:item.path isDirectory:&isDirectory];
-		item.type = isDirectory ? kItemTypeFolder : kItemTypeFile;
-		[items addObject:item];
-	}
-	[items sortUsingSelector:@selector(compare:)];
-	return items;
+	return [self itemsForDirectoryAtPath:directoryAtPath filteredBySearchString:nil];
 }
 
 - (NSArray*)itemsForCurrentDisplayedDirectoryPath {
 	return [self itemsForDirectoryAtPath:currentDisplayedDirectoryPath];
 }
+
+- (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath filteredBySearchString:(NSString*)searchString {
+	NSMutableArray *items = [[NSMutableArray alloc] init];
+	NSError *err;
+	NSArray *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directoryAtPath error:&err];
+	for (NSString *fileName in contents) {
+		if (searchString == nil
+			|| [searchString isEqualToString:@""]
+			|| [fileName rangeOfString:searchString options:NSRegularExpressionSearch].length > 0) { // regex search
+			BPItem *item = [[[BPItem alloc] init] autorelease];
+			item.name = fileName;
+			item.path = [NSString stringWithFormat:@"%@/%@", directoryAtPath, fileName];
+			BOOL isDirectory;
+			[[NSFileManager defaultManager] fileExistsAtPath:item.path isDirectory:&isDirectory];
+			item.type = isDirectory ? kItemTypeFolder : kItemTypeFile;
+			[items addObject:item];			
+		}
+	}
+	[items sortUsingSelector:@selector(compare:)];
+	return items;	
+}
+
+- (NSArray*)itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:(NSString*)searchString {
+	return [self itemsForDirectoryAtPath:currentDisplayedDirectoryPath filteredBySearchString:searchString];
+}
+
 
 - (BPItem*)createFileItemWithFileName:(NSString*)fileName atDirectoryPath:(NSString*)directoryPath {
 	NSString *filePath = [NSString stringWithFormat:@"%@/%@", directoryPath, fileName];

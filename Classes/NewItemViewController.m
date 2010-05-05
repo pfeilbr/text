@@ -11,7 +11,7 @@
 
 @implementation NewItemViewController
 
-@synthesize titleLabel, titleText, inputValueTextField, inputValueText;
+@synthesize itemType, titleLabel, titleText, inputValueTextField, inputValueText;
 
 - (NSString*)getInputValue {
 	return inputValueTextField.text;
@@ -25,16 +25,29 @@
 }
 
 - (IBAction)okButtonPressed:(id)sender {
+	
 	// create item
-	NSString *folderName = inputValueTextField.text;
+	NSString *itemName = inputValueTextField.text;
 	NSString *currentDisplayedDirectoryPath = [[BPItemManager sharedInstance] currentDisplayedDirectoryPath];
-	BPItem *item = [[BPItemManager sharedInstance] createFolderItemWithFolderName:folderName atDirectoryPath:currentDisplayedDirectoryPath];
+	
+	BPItem *item = nil;
+	
+	if (itemType == kItemTypeFile) {
+		item = [[BPItemManager sharedInstance] createFileItemWithFileName:itemName atDirectoryPath:currentDisplayedDirectoryPath];		
+	} else if (itemType == kItemTypeFolder) {
+		item = [[BPItemManager sharedInstance] createFolderItemWithFolderName:itemName atDirectoryPath:currentDisplayedDirectoryPath];
+	}
 	
 	// select item
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObject:item forKey:kKeyItem];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BPSelectItemInItemListNotification object:dict];
 	
 	[self dismissModalViewControllerAnimated:YES];
+}
+
+- (void)inputValueTextFieldTextDidChangeNotification:(NSNotification*)notification {
+	UITextField *textField = [notification object];
+	NSLog(@"%@", textField.text);
 }
 
 /*
@@ -50,6 +63,13 @@
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(inputValueTextFieldTextDidChangeNotification:)
+												 name:UITextFieldTextDidChangeNotification
+											   object:inputValueTextField];
+	
+	
 	titleLabel.text = titleText;
 	inputValueTextField.text = inputValueText;
 	[inputValueTextField becomeFirstResponder];

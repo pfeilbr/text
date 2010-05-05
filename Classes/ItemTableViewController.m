@@ -11,13 +11,17 @@
 
 @implementation ItemTableViewController
 
-@synthesize addButton, addActionSheet, currentDirectoryPath;
+@synthesize isRootDirectory, addButton, addActionSheet, currentDirectoryPath, searchString;
 
 #pragma mark -
 #pragma mark View lifecycle
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+	
+	if (isRootDirectory) {
+		self.navigationItem.hidesBackButton = YES;
+	}
 
 	self.clearsSelectionOnViewWillAppear = NO;
 	self.addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonPressed:)];
@@ -30,7 +34,6 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-	NSLog(@"%s", __PRETTY_FUNCTION__);
 	[BPItemManager sharedInstance].currentDisplayedDirectoryPath = self.currentDirectoryPath;
 	[self reload];
 	[super viewWillAppear:animated];
@@ -63,14 +66,12 @@
 #pragma mark Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-	NSLog(@"%s", __PRETTY_FUNCTION__);
     return 1;
 }
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	NSLog(@"%s", __PRETTY_FUNCTION__);
-	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];
+	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
     return [_items count];
 }
 
@@ -85,7 +86,7 @@
         cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
     }
 
-	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];
+	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
 	BPItem *item = [_items objectAtIndex:indexPath.row];
 	cell.textLabel.text = item.name;
 	cell.accessoryType = (item.type == kItemTypeFolder) ?  UITableViewCellAccessoryDisclosureIndicator :  UITableViewCellAccessoryNone;
@@ -108,7 +109,7 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {    
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         // Delete the row from the data source
-		NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];
+		NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
 		BPItem *item = [_items objectAtIndex:indexPath.row];
 		[[BPItemManager sharedInstance] deleteItem:item];
 		[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:YES];
@@ -141,7 +142,7 @@
 #pragma mark Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];
+	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
 	BPItem *item = [_items objectAtIndex:indexPath.row];
 	
 	switch (item.type) {
@@ -178,12 +179,18 @@
 	[self reload];
 	NSIndexPath *indexPath = [self indexPathForItem:item];
 	[self.tableView selectRowAtIndexPath:indexPath animated:YES scrollPosition:UITableViewScrollPositionTop];
+	
+	// display file contents in detail view
+	if (item.type == kItemTypeFile) {
+		NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObject:item forKey:kKeyItem];
+		[[NSNotificationCenter defaultCenter] postNotificationName:BPItemSelectedNotification object:dict];
+	}
 }
 
 - (NSIndexPath*)indexPathForItem:(BPItem*)item {
 	int rowIndex = -1;
 	int counter = 0;
-	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPath];	
+	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
 	for (BPItem *i in _items) {
 		if ([i isEqualToItem:item]) {
 			rowIndex = counter;
@@ -246,6 +253,16 @@
 		default:
 			break;
 	}
+}
+
+#pragma mark -
+#pragma mark UISearchDisplayDelegate
+
+#pragma mark -
+#pragma mark UISearchBarDelegate
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+	self.searchString = searchText;
+	[self reload];
 }
 
 #pragma mark -

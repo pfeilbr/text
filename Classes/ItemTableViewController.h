@@ -11,15 +11,19 @@
 #import "BPItem.h"
 
 
-@interface ItemTableViewController : UITableViewController<UIActionSheetDelegate> {
+@interface ItemTableViewController : UITableViewController<UIActionSheetDelegate, UISearchDisplayDelegate, UISearchBarDelegate> {
+	BOOL isRootDirectory;
 	UIBarButtonItem *addButton;	
 	UIActionSheet *addActionSheet;	
 	NSString *currentDirectoryPath;
+	NSString *searchString;
 }
 
+@property BOOL isRootDirectory;
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *addButton;
 @property (nonatomic, retain) IBOutlet UIActionSheet *addActionSheet;
 @property(nonatomic, copy) NSString *currentDirectoryPath;
+@property(nonatomic, copy) NSString *searchString;
 
 - (IBAction)addButtonPressed:(id)sender;
 - (void)reload;

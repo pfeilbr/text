@@ -101,16 +101,28 @@ enum TextViewActions {
 }
 
 - (void)addNewFile:(NSNotification*)notification {
+	/*
 	[self saveCurrentItem];
 	BPItem *_item = [[BPItemManager sharedInstance] createDefaultFileItemAtCurrentDisplayedDirectoryPath];
 	[self setDetailItem:_item];
 	[self editItemLabel];
+	 */
+	
+	NewItemViewController *nivc = [[NewItemViewController alloc] initWithNibName:@"NewItemViewController" bundle:nil];
+	nivc.modalPresentationStyle = UIModalPresentationFormSheet;
+	nivc.itemType = kItemTypeFile;
+	nivc.titleText = BPAddNewFileTitle;
+	nivc.inputValueText = [[BPItemManager sharedInstance] nextDefaultFileNameForCurrentDisplayedDirectoryPath];
+	[self presentModalViewController:nivc animated:YES];
+	[nivc release];	
+	
 }
 
 - (void)addNewFolder:(NSNotification*)notification {
 	[self saveCurrentItem];
 	NewItemViewController *nivc = [[NewItemViewController alloc] initWithNibName:@"NewItemViewController" bundle:nil];
 	nivc.modalPresentationStyle = UIModalPresentationFormSheet;
+	nivc.itemType = kItemTypeFolder;
 	nivc.titleText = BPAddNewFolderTitle;
 	nivc.inputValueText = [[BPItemManager sharedInstance] nextDefaultFolderNameForCurrentDisplayedDirectoryPath];
 	[self presentModalViewController:nivc animated:YES];

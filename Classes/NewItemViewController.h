@@ -10,12 +10,14 @@
 #import "BPItemManager.h"
 
 @interface NewItemViewController : UIViewController {
+	ItemType itemType;
 	UILabel *titleLabel;
 	NSString *titleText;
 	UITextField *inputValueTextField;
 	NSString *inputValueText;
 }
 
+@property ItemType itemType;
 @property(nonatomic, retain) IBOutlet UILabel *titleLabel;
 @property(nonatomic, retain) IBOutlet UITextField *inputValueTextField;
 @property(nonatomic, copy) NSString *titleText;

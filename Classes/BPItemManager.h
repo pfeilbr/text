@@ -25,6 +25,9 @@
 - (BOOL)deleteItem:(BPItem*)item;
 - (BPItem*)fileItemFromPath:(NSString*)path;
 
+- (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath filteredBySearchString:(NSString*)searchString;
+- (NSArray*)itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:(NSString*)searchString;
+
 - (NSString*)pushDirectoryName:(NSString*)directoryName;
 - (NSString*)popDirectoryName;
 

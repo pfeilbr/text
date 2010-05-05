@@ -9,12 +9,15 @@
 
 #define kKeyItem @"item"
 
+#define BPInvalidFileNameCharaters @"/\:*?\"'<>,"
+
 #define BPItemSelectedNotification @"BPItemSelectedNotification"
 #define BPSelectItemInItemListNotification @"BPSelectItemInItemListNotification"
 #define BPAddNewFileNotification @"BPAddNewFileNotification"
 #define BPAddNewFolderNotification @"BPAddNewFolderNotification"
 #define BPItemDeletedNotification @"BPItemDeletedNotification"
 
+#define BPAddNewFileTitle @"File Name"
 #define BPAddNewFolderTitle @"Folder Name"
 
 #define kAddNewFile 0

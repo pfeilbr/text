@@ -67,8 +67,13 @@
 												 name:BPSelectItemInItemListNotification
 											   object:nil];
 	
-	
-	
+	ItemTableViewController *itvc = [[ItemTableViewController alloc] initWithNibName:@"ItemTableViewController" bundle:nil];
+	itvc.isRootDirectory = YES;
+	itvc.title = @"Files";
+	itvc.currentDirectoryPath = [BPItemManager sharedInstance].currentDisplayedDirectoryPath;
+	[self.navigationController pushViewController:itvc animated:YES];	
+	[itvc release];
+		
 }
 
 - (void)displayItem:(NSNotification*)notification {
@@ -89,7 +94,6 @@
 	NSDictionary *dict = [[notification object] copy];
 	BPItem *item = [dict valueForKey:kKeyItem];
 	
-	//ItemTableViewController *itvc = (ItemTableViewController*)[self visibleViewController];
 	ItemTableViewController *itvc = (ItemTableViewController*)super.navigationController.topViewController;
 	[itvc selectItem:item];
 }
