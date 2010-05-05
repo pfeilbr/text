@@ -8,10 +8,15 @@
 
 #import "NewItemViewController.h"
 
+@interface NewItemViewController()
+- (void)selectInputValueTextFieldText:(id)sender;
+@end
+
+
 
 @implementation NewItemViewController
 
-@synthesize itemType, titleLabel, titleText, inputValueTextField, inputValueText;
+@synthesize okBarButtonItem, cancelBarButtonItem, itemType, titleLabel, messageLabel, titleText, inputValueTextField, inputValueText;
 
 - (NSString*)getInputValue {
 	return inputValueTextField.text;
@@ -20,7 +25,7 @@
 #pragma mark -
 #pragma mark Button Handlers
 
-- (IBAction)cancelButtonPressed:(id)sender {
+- (IBAction)cancelButtonPressed:(id)sender {	
 	[self dismissModalViewControllerAnimated:YES];
 }
 
@@ -47,6 +52,19 @@
 
 - (void)inputValueTextFieldTextDidChangeNotification:(NSNotification*)notification {
 	UITextField *textField = [notification object];
+	NSString *text = textField.text;
+	
+	// no '/' in file or folder names
+	if ([text rangeOfString:@"/"].length > 0) {
+		inputValueIsValid = NO;		
+		messageLabel.text = @"Name cannot include a forward slash '/'";
+		
+	} else {
+		inputValueIsValid = YES;
+		messageLabel.text = @"";
+	}
+	
+	okBarButtonItem.enabled = inputValueIsValid;
 	NSLog(@"%@", textField.text);
 }
 
@@ -63,6 +81,9 @@
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
+	[super viewDidLoad];
+	
+	inputValueIsValid = YES;
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(inputValueTextFieldTextDidChangeNotification:)
@@ -73,7 +94,25 @@
 	titleLabel.text = titleText;
 	inputValueTextField.text = inputValueText;
 	[inputValueTextField becomeFirstResponder];
-    [super viewDidLoad];
+	
+	// keyboard must finish animating in before we can do the text selection
+	[self performSelector:@selector(selectInputValueTextFieldText:) withObject:self afterDelay:0.5];
+}
+
+- (void)selectInputValueTextFieldText:(id)sender {
+	[inputValueTextField selectAll:self];
+	[UIMenuController sharedMenuController].menuVisible = NO;		
+}
+
+#pragma mark -
+#pragma mark UITextFieldDelegate
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+	if (inputValueIsValid) {
+		[self okButtonPressed:self];
+	}
+
+	return NO;
 }
 
 
