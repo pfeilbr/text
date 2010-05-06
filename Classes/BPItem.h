@@ -10,17 +10,20 @@
 
 
 @interface BPItem : NSObject {
+	NSString *type;
 	NSString *name;
 	NSString *path;
-	ItemType type;
 }
 
+@property(nonatomic, copy) NSString *type;
 @property(nonatomic, copy) NSString *name;
 @property(nonatomic, copy) NSString *path;
-@property ItemType type;
 
+- (NSString*)directoryPath;
 - (NSString*)contents;
 - (BOOL)isEqualToItem:(BPItem*)item;
 - (NSComparisonResult)compare:(BPItem*)item;
+- (BPItem*)itemFromDictionary:(NSDictionary*)dictionaryRepresentation;
+- (NSDictionary*)dictionaryRepresentation;
 
 @end

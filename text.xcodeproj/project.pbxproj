@@ -18,6 +18,10 @@
 		2819300E112F7FA900ECF9B4 /* text.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2819300D112F7FA900ECF9B4 /* text.xcdatamodeld */; };
 		2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */; };
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
+		C51B76EF1192FC3A00BB1830 /* options.png in Resources */ = {isa = PBXBuildFile; fileRef = C51B76EE1192FC3A00BB1830 /* options.png */; };
+		C51B781C1193064200BB1830 /* iPad-Launch-Image-Portrait.png in Resources */ = {isa = PBXBuildFile; fileRef = C51B781A1193064200BB1830 /* iPad-Launch-Image-Portrait.png */; };
+		C51B781D1193064200BB1830 /* iPad-Launch-Image-Landscape.png in Resources */ = {isa = PBXBuildFile; fileRef = C51B781B1193064200BB1830 /* iPad-Launch-Image-Landscape.png */; };
+		C51B78271193131000BB1830 /* app-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = C51B78261193131000BB1830 /* app-icon.png */; };
 		C534D767118AEF0C001A4856 /* NSObject+SBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = C534D75C118AEF0C001A4856 /* NSObject+SBJSON.m */; };
 		C534D768118AEF0C001A4856 /* NSString+SBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = C534D75E118AEF0C001A4856 /* NSString+SBJSON.m */; };
 		C534D769118AEF0C001A4856 /* SBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = C534D760118AEF0C001A4856 /* SBJSON.m */; };
@@ -79,6 +83,10 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* text-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "text-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		C51B768C11923C7A00BB1830 /* notes.textile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = notes.textile; sourceTree = "<group>"; };
+		C51B76EE1192FC3A00BB1830 /* options.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = options.png; sourceTree = "<group>"; };
+		C51B781A1193064200BB1830 /* iPad-Launch-Image-Portrait.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iPad-Launch-Image-Portrait.png"; sourceTree = "<group>"; };
+		C51B781B1193064200BB1830 /* iPad-Launch-Image-Landscape.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iPad-Launch-Image-Landscape.png"; sourceTree = "<group>"; };
+		C51B78261193131000BB1830 /* app-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app-icon.png"; sourceTree = "<group>"; };
 		C534D75A118AEF0C001A4856 /* JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSON.h; sourceTree = "<group>"; };
 		C534D75B118AEF0C001A4856 /* NSObject+SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+SBJSON.h"; sourceTree = "<group>"; };
 		C534D75C118AEF0C001A4856 /* NSObject+SBJSON.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+SBJSON.m"; sourceTree = "<group>"; };
@@ -243,6 +251,10 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C51B78261193131000BB1830 /* app-icon.png */,
+				C51B781A1193064200BB1830 /* iPad-Launch-Image-Portrait.png */,
+				C51B781B1193064200BB1830 /* iPad-Launch-Image-Landscape.png */,
+				C51B76EE1192FC3A00BB1830 /* options.png */,
 				2819300D112F7FA900ECF9B4 /* text.xcdatamodeld */,
 				28AD735F0D9D9599002E5188 /* MainWindow.xib */,
 				2804203B108E9BAB000629CD /* DetailView.xib */,
@@ -408,6 +420,10 @@
 				C534DA0F118F02E3001A4856 /* www in Resources */,
 				C534DA1B118F03E9001A4856 /* config in Resources */,
 				C537AB7011904507005EC707 /* NewItemViewController.xib in Resources */,
+				C51B76EF1192FC3A00BB1830 /* options.png in Resources */,
+				C51B781C1193064200BB1830 /* iPad-Launch-Image-Portrait.png in Resources */,
+				C51B781D1193064200BB1830 /* iPad-Launch-Image-Landscape.png in Resources */,
+				C51B78271193131000BB1830 /* app-icon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -32,34 +32,30 @@ enum TextViewActions {
 
 #pragma mark ActionSheet Delegate
 
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+- (void)actionSheet:(UIActionSheet *)_actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
 	[self saveCurrentItem];
 	
+	NSString *buttonTitle = [_actionSheet buttonTitleAtIndex:buttonIndex];
 	NSString *fileName = item.name;
-
-	switch (buttonIndex) {
-		case EMAIL:
-		{
-			NSString *body = [item contents];
-			MFMailComposeViewController *vc = [[MFMailComposeViewController alloc] init];
-			vc.mailComposeDelegate = self;		
-			[vc setSubject:fileName];        
-			[vc setMessageBody:body isHTML:NO];
-			vc.modalPresentationStyle = UIModalPresentationPageSheet;
-			[self presentModalViewController:vc animated:YES];
-			[vc release];
-			break;
-		}
-		case COPY_TO_CLIPBOARD:
-		{
-			NSString *body = [textView clipboardText];			
-			UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-			[pasteboard setString:body];
-			break;
-		}
-		default:
-			break;
+	
+	if ([buttonTitle isEqualToString:BPItemActionRenameFile]) {
+		NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObject:item forKey:kKeyItem];
+		[[NSNotificationCenter defaultCenter] postNotificationName:BPRenameFileNotification object:dict];			
+	} else if ([buttonTitle isEqualToString:BPItemActionEmailFile]) {
+		NSString *body = [item contents];
+		MFMailComposeViewController *vc = [[MFMailComposeViewController alloc] init];
+		vc.mailComposeDelegate = self;		
+		[vc setSubject:fileName];        
+		[vc setMessageBody:body isHTML:NO];
+		vc.modalPresentationStyle = UIModalPresentationPageSheet;
+		[self presentModalViewController:vc animated:YES];
+		[vc release];		
+	} else if ([buttonTitle isEqualToString:BPItemActionCopyFileToClipboard]) {
+		NSString *body = [textView clipboardText];			
+		UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+		[pasteboard setString:body];		
 	}
+
 }
 
 #pragma mark -
@@ -100,29 +96,41 @@ enum TextViewActions {
 	[[NSNotificationCenter defaultCenter] postNotificationName:BPSelectItemInItemListNotification object:dict];	
 }
 
-- (void)addNewFile:(NSNotification*)notification {
-	/*
-	[self saveCurrentItem];
-	BPItem *_item = [[BPItemManager sharedInstance] createDefaultFileItemAtCurrentDisplayedDirectoryPath];
-	[self setDetailItem:_item];
-	[self editItemLabel];
-	 */
-	
+- (void)addNewFile:(NSNotification*)notification {	
 	NewItemViewController *nivc = [[NewItemViewController alloc] initWithNibName:@"NewItemViewController" bundle:nil];
 	nivc.modalPresentationStyle = UIModalPresentationFormSheet;
-	nivc.itemType = kItemTypeFile;
+	nivc.mode = BPItemPropertyModifyModeNew;
+	nivc.itemType = BPItemPropertyTypeFile;
 	nivc.titleText = BPAddNewFileTitle;
 	nivc.inputValueText = [[BPItemManager sharedInstance] nextDefaultFileNameForCurrentDisplayedDirectoryPath];
 	[self presentModalViewController:nivc animated:YES];
-	[nivc release];	
-	
+	[nivc release];		
 }
+
+- (void)renameFile:(NSNotification*)notification {
+	NSDictionary *dict = [notification object];
+	BPItem *_item = [dict valueForKey:kKeyItem];
+	NewItemViewController *nivc = [[NewItemViewController alloc] initWithNibName:@"NewItemViewController" bundle:nil];
+	nivc.modalPresentationStyle = UIModalPresentationFormSheet;
+	nivc.mode = BPItemPropertyModifyModeRename;
+	nivc.itemType = BPItemPropertyTypeFile;
+	nivc.titleText = BPRenameFileTitle;
+	nivc.inputValueText = _item.name;
+	
+	NSMutableDictionary *dataDict = [NSMutableDictionary dictionaryWithObject:_item forKey:kKeyItem];
+	nivc.data = dataDict;
+	
+	[self presentModalViewController:nivc animated:YES];
+	[nivc release];		
+}
+
 
 - (void)addNewFolder:(NSNotification*)notification {
 	[self saveCurrentItem];
 	NewItemViewController *nivc = [[NewItemViewController alloc] initWithNibName:@"NewItemViewController" bundle:nil];
 	nivc.modalPresentationStyle = UIModalPresentationFormSheet;
-	nivc.itemType = kItemTypeFolder;
+	nivc.mode = BPItemPropertyModifyModeNew;	
+	nivc.itemType = BPItemPropertyTypeFolder;
 	nivc.titleText = BPAddNewFolderTitle;
 	nivc.inputValueText = [[BPItemManager sharedInstance] nextDefaultFolderNameForCurrentDisplayedDirectoryPath];
 	[self presentModalViewController:nivc animated:YES];
@@ -174,6 +182,8 @@ enum TextViewActions {
 	if (popoverController != nil) {
 		[popoverController dismissPopoverAnimated:YES];
 	}
+	
+	[[NSUserDefaults standardUserDefaults] setObject:[item dictionaryRepresentation] forKey:BPDefaultsLastItemDisplayed];
 }
 
 - (void)editItemLabel {
@@ -302,7 +312,7 @@ enum TextViewActions {
 															delegate:self
 												  cancelButtonTitle:nil
 											destructiveButtonTitle:nil
-												  otherButtonTitles:@"Email", @"Copy to Clipboard", nil];
+												  otherButtonTitles:BPItemActionRenameFile, BPItemActionEmailFile, BPItemActionCopyFileToClipboard, nil];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											       selector:@selector(orientationDidChange:)

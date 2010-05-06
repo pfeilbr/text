@@ -1,45 +1,59 @@
 h1. Features
 
 * -new file-
-* -new directory-
+* -new folder-
+* rename file & folder
+* move file & folder
 * -iTunes file sharing-
 * return to last opened file on application start
-* top 10 most recently accessed files
-* Open with - register app as a handler for txt, html, js, css
 * keyboard accessory view with most common keys/tags/etc. for each language
-	  o store each in it's own config.json file
-
-* syntax highlighting
-* built inwebserver
+** store each in it's own config.json file
+* top 10 most recently accessed files
+* bookmarks
 * JavaScript console
+** provide firebug lite's console api for console.log
+* File Templates
+** put in new file dialog
+* Open with - register app as a handler for txt, html, js, css
+* insert image - google, flickr, yahoo image search and local photos
+* built-in webserver
+* syntax highlighting
 * pyton console - run python code remotely
 * ruby console - run on appspot
 * heroku integration
-* insert image - google, flickr, yahoo image search and local photos
-* File Templates
-** put in new file dialog
 * Project
-	  o contains a dir hier w/files
-	  o export to zip
-	  o export to zip & email
-	  o web preview in UIWebView
-	  o project templates to pick from
-			+ web jquery
+** contains a dir hier w/files
+** export to zip
+** export to zip & email
+** web preview in UIWebView
+** project templates to pick from
+*** web jquery
 
 h2. Text Actions
 
 * -Send to Clipboard-
 * -Email text-
 * Email as HTML
+** email textile as html - javascript textile to html converter
+** email markdown as html - javascript markdown to html converter
+** email wikitext as html - javascript wikitext to html converter
 * FTP to
 * Export as PDF
 * To chm
 * Text to speech
 * Send to gitbub as gist (look at Textmate command for reference)
+* html
+** preview as html
+* textile
+** preview as html
+* markdown
+** preview as html
+
 
 h2. Settings / Config
 
 * font
+* text view background & foreground color
 * export all to zip
 ** send as email
 ** serve up with built-in webserver
@@ -80,6 +94,12 @@ h1. App Names
 * Iauthortheweb
 * Webedit
 
+h1. Keywords
+
+categories: productivity
+
+text, editor, edit, file, develop, tool, web, notes, html, javascript, css
+
 
 h1. Design
 
@@ -88,3 +108,8 @@ h1. Design
 * BPItem cache in BPItemManager
 ** implement as NSMutableDictionary
 *** key = item type + item path
+
+h1. Beta Testing
+
+* Frank, Sean
+* Send off to Gruber

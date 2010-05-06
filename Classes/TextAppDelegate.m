@@ -43,7 +43,7 @@
 	rootViewController.currentDirectoryPath = [BPItemManager sharedInstance].currentDisplayedDirectoryPath;
     
     // Override point for customization after app launch    
-    rootViewController.managedObjectContext = self.managedObjectContext;
+    //rootViewController.managedObjectContext = self.managedObjectContext;
 
     
 	// Add the split view controller's view to the window and display.

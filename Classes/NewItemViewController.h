@@ -7,10 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BPItem.h"
 #import "BPItemManager.h"
 
 @interface NewItemViewController : UIViewController<UITextFieldDelegate> {
-	ItemType itemType;
+	NSMutableDictionary *data;
+	NSString *mode;	
+	NSString *itemType;
 	UILabel *titleLabel;
 	UILabel *messageLabel;
 	UIBarButtonItem *okBarButtonItem;
@@ -21,7 +24,9 @@
 	BOOL inputValueIsValid;
 }
 
-@property ItemType itemType;
+@property(nonatomic, retain) NSMutableDictionary *data;
+@property(nonatomic, copy) NSString *mode;
+@property(nonatomic, copy) NSString *itemType;
 @property(nonatomic, retain) IBOutlet UIBarButtonItem *okBarButtonItem;
 @property(nonatomic, retain) IBOutlet UIBarButtonItem *cancelBarButtonItem;
 @property(nonatomic, retain) IBOutlet UILabel *titleLabel;

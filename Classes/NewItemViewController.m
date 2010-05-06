@@ -16,7 +16,7 @@
 
 @implementation NewItemViewController
 
-@synthesize okBarButtonItem, cancelBarButtonItem, itemType, titleLabel, messageLabel, titleText, inputValueTextField, inputValueText;
+@synthesize data, mode, okBarButtonItem, cancelBarButtonItem, itemType, titleLabel, messageLabel, titleText, inputValueTextField, inputValueText;
 
 - (NSString*)getInputValue {
 	return inputValueTextField.text;
@@ -30,17 +30,28 @@
 }
 
 - (IBAction)okButtonPressed:(id)sender {
-	
+		
 	// create item
 	NSString *itemName = inputValueTextField.text;
 	NSString *currentDisplayedDirectoryPath = [[BPItemManager sharedInstance] currentDisplayedDirectoryPath];
 	
 	BPItem *item = nil;
 	
-	if (itemType == kItemTypeFile) {
-		item = [[BPItemManager sharedInstance] createFileItemWithFileName:itemName atDirectoryPath:currentDisplayedDirectoryPath];		
-	} else if (itemType == kItemTypeFolder) {
-		item = [[BPItemManager sharedInstance] createFolderItemWithFolderName:itemName atDirectoryPath:currentDisplayedDirectoryPath];
+	if ([mode isEqualToString:BPItemPropertyModifyModeNew]) {
+		if ([itemType isEqualToString:BPItemPropertyTypeFile]) {
+			item = [[BPItemManager sharedInstance] createFileItemWithFileName:itemName atDirectoryPath:currentDisplayedDirectoryPath];		
+		} else if ([itemType isEqualToString:BPItemPropertyTypeFolder]) {
+			item = [[BPItemManager sharedInstance] createFolderItemWithFolderName:itemName atDirectoryPath:currentDisplayedDirectoryPath];
+		}		
+	} else if ([mode isEqualToString:BPItemPropertyModifyModeRename]) {
+		BPItem *_item = [data valueForKey:kKeyItem];
+		NSString *path = nil;
+		if ([_item.type isEqualToString:BPItemPropertyTypeFile]) {
+			path = [[_item directoryPath] stringByAppendingPathComponent:itemName];
+		} else if ([_item.type isEqualToString:BPItemPropertyTypeFolder]) {
+			path = [[_item.path stringByDeletingLastPathComponent] stringByAppendingPathComponent:itemName];
+		}
+		item = [[BPItemManager sharedInstance] moveItem:_item toPath:(NSString*)path];
 	}
 	
 	// select item

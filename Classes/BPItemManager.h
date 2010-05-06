@@ -41,5 +41,7 @@
 - (BPItem*)createDefaultFileItemAtCurrentDisplayedDirectoryPath;
 - (BPItem*)renameFileItemFromPath:(NSString*)fromPath toPath:(NSString*)toPath;
 
+- (BPItem*)moveItem:(BPItem*)item toPath:(NSString*)path;
+
 
 @end

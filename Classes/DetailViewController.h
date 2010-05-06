@@ -49,6 +49,7 @@
 - (void)setDetailItem:(BPItem*)item;
 - (void)saveCurrentItem;
 - (void)addNewFile:(NSNotification*)notification;
+- (void)renameFile:(NSNotification*)notification;
 - (void)addNewFolder:(NSNotification*)notification;
 - (void)editItemLabel;
 - (IBAction)actionsButtonPressed:(id)sender;

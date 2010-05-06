@@ -63,7 +63,7 @@ BPItemManager *sharedInstance = nil;
 			item.path = [NSString stringWithFormat:@"%@/%@", directoryAtPath, fileName];
 			BOOL isDirectory;
 			[[NSFileManager defaultManager] fileExistsAtPath:item.path isDirectory:&isDirectory];
-			item.type = isDirectory ? kItemTypeFolder : kItemTypeFile;
+			item.type = isDirectory ? BPItemPropertyTypeFolder : BPItemPropertyTypeFile;
 			[items addObject:item];			
 		}
 	}
@@ -85,7 +85,7 @@ BPItemManager *sharedInstance = nil;
 		item = [[BPItem alloc] init];
 		item.name = fileName;
 		item.path = [NSString stringWithFormat:@"%@/%@", directoryPath, fileName];
-		item.type = kItemTypeFile;
+		item.type = BPItemPropertyTypeFile;
 	}
 	return item;
 }
@@ -98,7 +98,7 @@ BPItemManager *sharedInstance = nil;
 		item = [[BPItem alloc] init];
 		item.name = folderName;
 		item.path = fullDirectoryPath;
-		item.type = kItemTypeFolder;
+		item.type = BPItemPropertyTypeFolder;
 	}
 	return item;
 }
@@ -110,10 +110,23 @@ BPItemManager *sharedInstance = nil;
 		item = [[BPItem alloc] init];
 		item.name = [path lastPathComponent];
 		item.path = path;
-		item.type = kItemTypeFile;
+		item.type = BPItemPropertyTypeFile;
 	}
 	return item;	
 }
+
+- (BPItem*)folderItemFromPath:(NSString*)path {
+	BPItem *item = nil;
+	BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
+	if (fileExists) {
+		item = [[BPItem alloc] init];
+		item.name = [path lastPathComponent];
+		item.path = path;
+		item.type = BPItemPropertyTypeFolder;
+	}
+	return item;	
+}
+
 
 - (BPItem*)createDefaultFileItemAtCurrentDisplayedDirectoryPath {
 	NSString *fileName = [self nextDefaultFileNameForCurrentDisplayedDirectoryPath];
@@ -182,6 +195,22 @@ BPItemManager *sharedInstance = nil;
 	NSError *err;
 	[[NSFileManager defaultManager] moveItemAtPath:fromPath toPath:toPath error:&err];
 	return [self fileItemFromPath:toPath];
+}
+
+- (BPItem*)moveItem:(BPItem*)item toPath:(NSString*)path {
+	NSError *err;
+	BOOL moved = [[NSFileManager defaultManager] moveItemAtPath:item.path toPath:path error:&err];
+	if (moved) {
+		//TODO: add error logic
+	}
+	
+	BPItem *newItem = nil;
+	if ([item.type isEqualToString:BPItemPropertyTypeFile]) {
+		newItem = [self fileItemFromPath:path];
+	} else if ([item.type isEqualToString:BPItemPropertyTypeFolder]) {
+		newItem = [self folderItemFromPath:path];
+	}
+	return newItem;
 }
 
 @end

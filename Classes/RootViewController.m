@@ -34,17 +34,6 @@
     [super viewDidLoad];
     self.clearsSelectionOnViewWillAppear = NO;
     self.contentSizeForViewInPopover = CGSizeMake(320.0, 600.0);
-
-    NSError *error = nil;
-    if (![[self fetchedResultsController] performFetch:&error]) {
-        /*
-         Replace this implementation with code to handle the error appropriately.
-         
-         abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development. If it is not possible to recover from the error, display an alert panel that instructs the user to quit the application by pressing the Home button.
-         */
-        NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-        abort();
-    }
 		
 	[[NSNotificationCenter defaultCenter] addObserver:self
 													selector:@selector(displayItem:)
@@ -56,6 +45,11 @@
 													selector:@selector(addNewFile:)
 														name:BPAddNewFileNotification
 														object:nil];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(renameFile:)
+												 name:BPRenameFileNotification
+											   object:nil];	
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(addNewFolder:)
@@ -85,6 +79,11 @@
 - (void)addNewFile:(NSNotification*)notification {
 	[detailViewController addNewFile:notification];
 }
+
+- (void)renameFile:(NSNotification*)notification {
+	[detailViewController renameFile:notification];
+}
+
 
 - (void)addNewFolder:(NSNotification*)notification {
 	[detailViewController addNewFolder:notification];	

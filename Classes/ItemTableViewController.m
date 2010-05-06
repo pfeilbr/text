@@ -8,6 +8,10 @@
 
 #import "ItemTableViewController.h"
 
+@interface ItemTableViewController()
+- (NSIndexPath*)indexPathForItem:(BPItem*)item;
+@end
+
 
 @implementation ItemTableViewController
 
@@ -30,7 +34,7 @@
 													  delegate:self
 											 cancelButtonTitle:nil
 										destructiveButtonTitle:nil
-											 otherButtonTitles:@"New File", @"New Folder", @"New Project", nil];
+											 otherButtonTitles:BPItemActionNewFile, BPItemActionNewFolder, nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -89,7 +93,7 @@
 	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
 	BPItem *item = [_items objectAtIndex:indexPath.row];
 	cell.textLabel.text = item.name;
-	cell.accessoryType = (item.type == kItemTypeFolder) ?  UITableViewCellAccessoryDisclosureIndicator :  UITableViewCellAccessoryNone;
+	cell.accessoryType = ([item.type isEqualToString:BPItemPropertyTypeFolder]) ?  UITableViewCellAccessoryDisclosureIndicator :  UITableViewCellAccessoryNone;
     
     return cell;
 }
@@ -145,28 +149,17 @@
 	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
 	BPItem *item = [_items objectAtIndex:indexPath.row];
 	
-	switch (item.type) {
-		case kItemTypeFile:
-		{
-			NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-			[dict setObject:item forKey:kKeyItem];
-			[[NSNotificationCenter defaultCenter] postNotificationName:BPItemSelectedNotification object:dict];
-			break;
-		}
-		case kItemTypeFolder:
-		{
-			ItemTableViewController *itvc = [[ItemTableViewController alloc] initWithNibName:@"ItemTableViewController" bundle:nil];
-			itvc.title = item.name;
-			itvc.currentDirectoryPath = [[BPItemManager sharedInstance] pushDirectoryName:item.name];
-			[self.navigationController pushViewController:itvc animated:YES];	
-			[itvc release];
-			break;
-		}
-		default:
-		{
-			break;
-		}
-	}
+	if ([item.type isEqualToString:BPItemPropertyTypeFile]) {
+		NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+		[dict setObject:item forKey:kKeyItem];
+		[[NSNotificationCenter defaultCenter] postNotificationName:BPItemSelectedNotification object:dict];		
+	} else if ([item.type isEqualToString:BPItemPropertyTypeFolder]) {
+		ItemTableViewController *itvc = [[ItemTableViewController alloc] initWithNibName:@"ItemTableViewController" bundle:nil];
+		itvc.title = item.name;
+		itvc.currentDirectoryPath = [[BPItemManager sharedInstance] pushDirectoryName:item.name];
+		[self.navigationController pushViewController:itvc animated:YES];	
+		[itvc release];		
+	}	
 }
 
 #pragma mark Item Manipulation
@@ -181,7 +174,7 @@
 	[self.tableView selectRowAtIndexPath:indexPath animated:YES scrollPosition:UITableViewScrollPositionTop];
 	
 	// display file contents in detail view
-	if (item.type == kItemTypeFile) {
+	if ([item.type isEqualToString:BPItemPropertyTypeFile]) {
 		NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObject:item forKey:kKeyItem];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BPItemSelectedNotification object:dict];
 	}
@@ -205,27 +198,10 @@
 #pragma mark Button Handlers
 
 - (IBAction)addButtonPressed:(id)sender {
-	/*
-	UIViewController *vc = [[UIViewController alloc] init];
-	[self.navigationController pushViewController:vc animated:YES];
-	[vc release];
-	*/
-	
-	/*
-	 NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
-	 NSError *err;
-	 NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:&err];
-	 */
 	
     if (self.addActionSheet.visible) {
         [self.addActionSheet dismissWithClickedButtonIndex:-1 animated:NO];
     }
-    
-	/*
-	 if (popoverController != nil) {
-	 [popoverController dismissPopoverAnimated:YES];
-	 }
-	 */
     
     [addActionSheet showFromBarButtonItem:addButton animated:YES];	
 }
