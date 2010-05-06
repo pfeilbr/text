@@ -1,0 +1,90 @@
+h1. Features
+
+* -new file-
+* -new directory-
+* -iTunes file sharing-
+* return to last opened file on application start
+* top 10 most recently accessed files
+* Open with - register app as a handler for txt, html, js, css
+* keyboard accessory view with most common keys/tags/etc. for each language
+	  o store each in it's own config.json file
+
+* syntax highlighting
+* built inwebserver
+* JavaScript console
+* pyton console - run python code remotely
+* ruby console - run on appspot
+* heroku integration
+* insert image - google, flickr, yahoo image search and local photos
+* File Templates
+** put in new file dialog
+* Project
+	  o contains a dir hier w/files
+	  o export to zip
+	  o export to zip & email
+	  o web preview in UIWebView
+	  o project templates to pick from
+			+ web jquery
+
+h2. Text Actions
+
+* -Send to Clipboard-
+* -Email text-
+* Email as HTML
+* FTP to
+* Export as PDF
+* To chm
+* Text to speech
+* Send to gitbub as gist (look at Textmate command for reference)
+
+h2. Settings / Config
+
+* font
+* export all to zip
+** send as email
+** serve up with built-in webserver
+* Reset to Default settings
+
+h1. App Names
+
+* textbench
+* Text Station
+* Textify
+* Texty
+* Textism
+* Simplytext
+* All things text
+* Textshop
+* Textspace
+* Textr
+* Texttastic
+* Ulratext
+* Ultext
+* Texttool
+* Textfactory
+* Textboard
+* Textbucket
+* Textmine
+* Text cafe
+* Cafe text
+* Texthouse
+* Texted
+* Textverse
+* Textbelt
+* Textman
+* Textbandit
+* Textsmith
+* Itextify
+* I* (I in front of everything)
+* Iwebedit
+* Iauthortheweb
+* Webedit
+
+
+h1. Design
+
+* Main text editing view - BPTextView : UITextView
+* BPTextViewController - has a toolbar at the bottom or top with the following editing buttons: snippet, tidy, spell check, copy to clipboard
+* BPItem cache in BPItemManager
+** implement as NSMutableDictionary
+*** key = item type + item path
