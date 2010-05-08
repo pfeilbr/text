@@ -13,6 +13,13 @@
 
 @synthesize type, name, path;
 
+- (void)dealloc {
+	[type release];
+	[name release];
+	[path release];
+	[super dealloc];
+}
+
 - (NSString*)directoryPath {
 	NSString *_path = nil;
 	if ([type isEqualToString:BPItemPropertyTypeFile]) {
@@ -49,7 +56,7 @@
 	item.type = [dictionaryRepresentation valueForKey:BPItemPropertyType];
 	item.name = [dictionaryRepresentation valueForKey:BPItemPropertyName];
 	item.path = [dictionaryRepresentation valueForKey:BPItemPropertyPath];
-	return item;
+	return [item autorelease];
 }
 
 - (NSDictionary*)dictionaryRepresentation {

@@ -53,12 +53,12 @@
 		}
 		item = [[BPItemManager sharedInstance] moveItem:_item toPath:(NSString*)path];
 	}
+		
+	[self dismissModalViewControllerAnimated:YES];
 	
 	// select item
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObject:item forKey:kKeyItem];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BPSelectItemInItemListNotification object:dict];
-	
-	[self dismissModalViewControllerAnimated:YES];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BPSelectItemInItemListNotification object:dict];	
 }
 
 - (void)inputValueTextFieldTextDidChangeNotification:(NSNotification*)notification {
@@ -149,6 +149,17 @@
 
 
 - (void)dealloc {
+	[data release];
+	[mode release];	
+	[itemType release];
+	[titleLabel release];
+	[messageLabel release];
+	[okBarButtonItem release];
+	[cancelBarButtonItem release];
+	[titleText release];
+	[inputValueTextField release];
+	[inputValueText release];
+	
     [super dealloc];
 }
 

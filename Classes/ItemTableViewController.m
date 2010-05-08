@@ -23,16 +23,25 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
+	self.addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonPressed:)];
+	UIBarButtonItem *_flexibleSpaceButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+	UIBarButtonItem *_deleteButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:nil action:nil];
+	NSArray *buttons = [NSArray arrayWithObjects:self.addButton, _flexibleSpaceButton, _deleteButton, nil];
+	[self setToolbarItems:buttons animated:NO];
+	[_flexibleSpaceButton release];
+	[_deleteButton release];
+	
+	
 	if (isRootDirectory) {
 		self.navigationItem.hidesBackButton = YES;
 	}
 
 	self.clearsSelectionOnViewWillAppear = NO;
-	self.addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonPressed:)];
-	self.navigationItem.rightBarButtonItem = addButton;
+	//self.addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonPressed:)];
+	//self.navigationItem.rightBarButtonItem = addButton;
 	self.addActionSheet = [[UIActionSheet alloc] initWithTitle:nil
 													  delegate:self
-											 cancelButtonTitle:nil
+											 cancelButtonTitle:BPItemActionCancel
 										destructiveButtonTitle:nil
 											 otherButtonTitles:BPItemActionNewFile, BPItemActionNewFolder, nil];
 }
@@ -121,6 +130,22 @@
 		NSMutableDictionary *dict = [NSMutableDictionary dictionary];
 		[dict setObject:item forKey:kKeyItem];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BPItemDeletedNotification object:dict];
+		
+		// if this wasn't the last row deleted, select the next row
+		if ([_items count] > 1) {
+			BPItem *itemToSelect = nil;
+			
+			// if we deleted the last item in the list, select the previous one
+			if (([_items count] - 1) == indexPath.row) {
+				itemToSelect = [_items objectAtIndex:indexPath.row - 1];
+			} else { // select next item in list
+				itemToSelect = [_items objectAtIndex:indexPath.row + 1];
+			}
+
+			NSMutableDictionary *itemToSelectDict = [NSMutableDictionary dictionary];
+			[itemToSelectDict setObject:itemToSelect forKey:kKeyItem];
+			[[NSNotificationCenter defaultCenter] postNotificationName:BPSelectItemInItemListNotification object:itemToSelectDict];			
+		}
     }   
 }
 
@@ -258,6 +283,10 @@
 
 
 - (void)dealloc {
+	[addButton release];
+	[addActionSheet release];
+	[currentDirectoryPath release];
+	[searchString release];
     [super dealloc];
 }
 

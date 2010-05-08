@@ -38,6 +38,7 @@
 #define BPItemActionNewFolder @"New Folder"
 #define BPItemActionRenameFolder @"Rename Folder"
 #define BPItemActionMoveFolder @"Move Folder"
+#define BPItemActionCancel @"Cancel"
 
 #define BPAddNewFileTitle @"File Name"
 #define BPRenameFileTitle @"Rename File"

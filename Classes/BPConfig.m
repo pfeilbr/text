@@ -26,6 +26,11 @@ static BPConfig *sharedInstance = nil;
 	return sharedInstance;
 }
 
+- (void)dealloc {
+	[sharedInstance release];
+	[super dealloc];
+}
+
 - (NSString *)applicationDocumentsDirectory {
 	return [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
 }

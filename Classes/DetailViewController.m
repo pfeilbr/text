@@ -366,8 +366,16 @@ enum TextViewActions {
 	
     [popoverController release];
     [toolbar release];
-	
+	[itemLabelBarButtonItem release];
+	[itemLabel release];
+	[itemLabelTextField release];
 	[detailDescriptionLabel release];
+	[textView release];
+	[keyboardAccessoryView release];
+	[item release];
+	[actionsButton release];
+	[actionSheet release];
+	[settingsButton release];
     
 	[super dealloc];
 }	

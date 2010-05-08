@@ -33,6 +33,12 @@ BPItemManager *sharedInstance = nil;
 	return sharedInstance;
 }
 
+- (void)dealloc {
+	[currentDisplayedDirectoryPath release];
+	[sharedInstance release];
+	[super dealloc];
+}
+
 - (NSString*)itemRootDirectory {
 	return [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
 }
@@ -68,7 +74,7 @@ BPItemManager *sharedInstance = nil;
 		}
 	}
 	[items sortUsingSelector:@selector(compare:)];
-	return items;	
+	return [items autorelease];	
 }
 
 - (NSArray*)itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:(NSString*)searchString {
@@ -87,7 +93,7 @@ BPItemManager *sharedInstance = nil;
 		item.path = [NSString stringWithFormat:@"%@/%@", directoryPath, fileName];
 		item.type = BPItemPropertyTypeFile;
 	}
-	return item;
+	return [item autorelease];
 }
 
 - (BPItem*)createFolderItemWithFolderName:(NSString*)folderName atDirectoryPath:(NSString*)directoryPath {
@@ -100,7 +106,7 @@ BPItemManager *sharedInstance = nil;
 		item.path = fullDirectoryPath;
 		item.type = BPItemPropertyTypeFolder;
 	}
-	return item;
+	return [item autorelease];
 }
 
 - (BPItem*)fileItemFromPath:(NSString*)path {
@@ -112,7 +118,7 @@ BPItemManager *sharedInstance = nil;
 		item.path = path;
 		item.type = BPItemPropertyTypeFile;
 	}
-	return item;	
+	return [item autorelease];	
 }
 
 - (BPItem*)folderItemFromPath:(NSString*)path {
@@ -124,7 +130,7 @@ BPItemManager *sharedInstance = nil;
 		item.path = path;
 		item.type = BPItemPropertyTypeFolder;
 	}
-	return item;	
+	return [item autorelease];	
 }
 
 
