@@ -15,7 +15,7 @@
 
 @implementation ItemTableViewController
 
-@synthesize isRootDirectory, addButton, addActionSheet, currentDirectoryPath, searchString;
+@synthesize isRootDirectory, addButton, addActionSheet, currentDirectoryPath, searchString, currentSelectedItem;
 
 #pragma mark -
 #pragma mark View lifecycle
@@ -102,7 +102,7 @@
 	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
 	BPItem *item = [_items objectAtIndex:indexPath.row];
 	cell.textLabel.text = item.name;
-	cell.accessoryType = ([item.type isEqualToString:BPItemPropertyTypeFolder]) ?  UITableViewCellAccessoryDisclosureIndicator :  UITableViewCellAccessoryNone;
+	cell.accessoryType = ([item.type isEqualToString:BPItemPropertyTypeFolder]) ?  UITableViewCellAccessoryDetailDisclosureButton :  UITableViewCellAccessoryNone;
     
     return cell;
 }
@@ -173,17 +173,33 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
 	BPItem *item = [_items objectAtIndex:indexPath.row];
+	currentSelectedItem = item;
 	
 	if ([item.type isEqualToString:BPItemPropertyTypeFile]) {
 		NSMutableDictionary *dict = [NSMutableDictionary dictionary];
 		[dict setObject:item forKey:kKeyItem];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BPItemSelectedNotification object:dict];		
 	} else if ([item.type isEqualToString:BPItemPropertyTypeFolder]) {
+		/*
 		ItemTableViewController *itvc = [[ItemTableViewController alloc] initWithNibName:@"ItemTableViewController" bundle:nil];
 		itvc.title = item.name;
 		itvc.currentDirectoryPath = [[BPItemManager sharedInstance] pushDirectoryName:item.name];
 		[self.navigationController pushViewController:itvc animated:YES];	
-		[itvc release];		
+		[itvc release];
+		 */
+	}	
+}
+
+- (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
+	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
+	BPItem *item = [_items objectAtIndex:indexPath.row];
+
+	if ([item.type isEqualToString:BPItemPropertyTypeFolder]) {
+		ItemTableViewController *itvc = [[ItemTableViewController alloc] initWithNibName:@"ItemTableViewController" bundle:nil];
+		itvc.title = item.name;
+		itvc.currentDirectoryPath = [[BPItemManager sharedInstance] pushDirectoryName:item.name];
+		[self.navigationController pushViewController:itvc animated:YES];	
+		[itvc release];
 	}	
 }
 
@@ -195,6 +211,7 @@
 
 - (void)selectItem:(BPItem*)item {
 	[self reload];
+	currentSelectedItem = item;
 	NSIndexPath *indexPath = [self indexPathForItem:item];
 	[self.tableView selectRowAtIndexPath:indexPath animated:YES scrollPosition:UITableViewScrollPositionTop];
 	

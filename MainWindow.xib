@@ -12,7 +12,6 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="38"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -98,7 +97,6 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="IBUITableViewController" id="641806676">
 							<object class="IBUINavigationItem" key="IBUINavigationItem" id="463972797">
-								<reference key="IBUINavigationBar"/>
 								<string key="IBUITitle">Files</string>
 								<object class="IBUIBarButtonItem" key="IBUILeftBarButtonItem" id="996216472">
 									<string key="targetRuntimeIdentifier">IBIPadFramework</string>
@@ -450,11 +448,11 @@
 							<string>actionSheet</string>
 							<string>actionsButton</string>
 							<string>detailDescriptionLabel</string>
+							<string>inputAccessoryView</string>
 							<string>item</string>
 							<string>itemLabel</string>
 							<string>itemLabelBarButtonItem</string>
 							<string>itemLabelTextField</string>
-							<string>keyboardAccessoryView</string>
 							<string>rootViewController</string>
 							<string>settingsButton</string>
 							<string>textView</string>
@@ -465,11 +463,11 @@
 							<string>UIActionSheet</string>
 							<string>UIBarButtonItem</string>
 							<string>UILabel</string>
+							<string>UIView</string>
 							<string>BPItem</string>
 							<string>UILabel</string>
 							<string>UIBarButtonItem</string>
 							<string>UITextField</string>
-							<string>UIView</string>
 							<string>RootViewController</string>
 							<string>UIBarButtonItem</string>
 							<string>BPTextView</string>
@@ -483,11 +481,11 @@
 							<string>actionSheet</string>
 							<string>actionsButton</string>
 							<string>detailDescriptionLabel</string>
+							<string>inputAccessoryView</string>
 							<string>item</string>
 							<string>itemLabel</string>
 							<string>itemLabelBarButtonItem</string>
 							<string>itemLabelTextField</string>
-							<string>keyboardAccessoryView</string>
 							<string>rootViewController</string>
 							<string>settingsButton</string>
 							<string>textView</string>
@@ -508,6 +506,10 @@
 								<string key="candidateClassName">UILabel</string>
 							</object>
 							<object class="IBToOneOutletInfo">
+								<string key="name">inputAccessoryView</string>
+								<string key="candidateClassName">UIView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
 								<string key="name">item</string>
 								<string key="candidateClassName">BPItem</string>
 							</object>
@@ -522,10 +524,6 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">itemLabelTextField</string>
 								<string key="candidateClassName">UITextField</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">keyboardAccessoryView</string>
-								<string key="candidateClassName">UIView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">rootViewController</string>

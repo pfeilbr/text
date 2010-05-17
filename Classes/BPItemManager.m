@@ -39,6 +39,79 @@ BPItemManager *sharedInstance = nil;
 	[super dealloc];
 }
 
+#pragma mark -
+#pragma mark Item Creation
+
+- (BPItem*)fileItem {
+	BPItem *item = [[BPItem alloc] init];
+	item.name = @"";
+	item.path = @"";
+	item.type = BPItemPropertyTypeFile;	
+	return [item autorelease];
+}
+
+- (BPItem*)folderItem {
+	BPItem *item = [[BPItem alloc] init];
+	item.name = @"";
+	item.path = @"";
+	item.type = BPItemPropertyTypeFolder;	
+	return [item autorelease];
+}
+
+- (BPItem*)fileItemFromPath:(NSString*)path {
+	BPItem *item = nil;
+	BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
+	if (fileExists) {
+		item = [self fileItem];
+		item.name = [path lastPathComponent];
+		item.path = path;
+	}
+	return item;
+}
+
+- (BPItem*)folderItemFromPath:(NSString*)path {
+	BPItem *item = nil;
+	BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
+	if (fileExists) {
+		item = [self folderItem];
+		item.name = [path lastPathComponent];
+		item.path = path;
+	}
+	return item;
+}
+
+- (BPItem*)createFileItemWithFileName:(NSString*)fileName atDirectoryPath:(NSString*)directoryPath {
+	NSString *filePath = [NSString stringWithFormat:@"%@/%@", directoryPath, fileName];
+	NSData *data = [NSData data];
+	BOOL fileCreated = [[NSFileManager defaultManager] createFileAtPath:filePath contents:data attributes:nil];
+	if (fileCreated) {
+		return [self fileItemFromPath:filePath];
+	} else {
+		//TODO: error handling here
+		return nil;
+	}
+}
+
+- (BPItem*)createFolderItemWithFolderName:(NSString*)folderName atDirectoryPath:(NSString*)directoryPath {
+	NSString *fullDirectoryPath = [NSString stringWithFormat:@"%@/%@", directoryPath, folderName];
+	BOOL directoryCreated = [[NSFileManager defaultManager] createDirectoryAtPath:fullDirectoryPath attributes:nil];
+	if (directoryCreated) {
+		return [self folderItemFromPath:fullDirectoryPath];
+	} else {
+		//TODO: error handling here
+		return nil;
+	}
+}
+
+- (BPItem*)createDefaultFileItemAtCurrentDisplayedDirectoryPath {
+	NSString *fileName = [self nextDefaultFileNameForCurrentDisplayedDirectoryPath];
+	return [self createFileItemWithFileName:fileName atDirectoryPath:currentDisplayedDirectoryPath];
+}
+
+
+#pragma mark -
+#pragma mark Item Retrieval
+
 - (NSString*)itemRootDirectory {
 	return [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
 }
@@ -48,12 +121,11 @@ BPItemManager *sharedInstance = nil;
 	return [self itemsForDirectoryAtPath:rootDirectory];
 }
 
-- (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath {
-	return [self itemsForDirectoryAtPath:directoryAtPath filteredBySearchString:nil];
-}
-
-- (NSArray*)itemsForCurrentDisplayedDirectoryPath {
-	return [self itemsForDirectoryAtPath:currentDisplayedDirectoryPath];
+- (NSArray*)specialRootItems {
+	BPItem *localRoot = [self folderItemFromPath:[self itemRootDirectory]];
+	BPItem *dropboxRoot = [self folderItemFromPath:[self itemRootDirectory]];
+	NSMutableArray *items = [NSMutableArray arrayWithObjects:localRoot, dropboxRoot, nil];
+	return [items autorelease];
 }
 
 - (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath filteredBySearchString:(NSString*)searchString {
@@ -77,75 +149,16 @@ BPItemManager *sharedInstance = nil;
 	return [items autorelease];	
 }
 
+- (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath {
+	return [self itemsForDirectoryAtPath:directoryAtPath filteredBySearchString:nil];
+}
+
+- (NSArray*)itemsForCurrentDisplayedDirectoryPath {
+	return [self itemsForDirectoryAtPath:currentDisplayedDirectoryPath];
+}
+
 - (NSArray*)itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:(NSString*)searchString {
 	return [self itemsForDirectoryAtPath:currentDisplayedDirectoryPath filteredBySearchString:searchString];
-}
-
-
-- (BPItem*)createFileItemWithFileName:(NSString*)fileName atDirectoryPath:(NSString*)directoryPath {
-	NSString *filePath = [NSString stringWithFormat:@"%@/%@", directoryPath, fileName];
-	NSData *data = [NSData data];
-	BOOL fileCreated = [[NSFileManager defaultManager] createFileAtPath:filePath contents:data attributes:nil];
-	BPItem *item = nil;
-	if (fileCreated) {
-		item = [[BPItem alloc] init];
-		item.name = fileName;
-		item.path = [NSString stringWithFormat:@"%@/%@", directoryPath, fileName];
-		item.type = BPItemPropertyTypeFile;
-	}
-	return [item autorelease];
-}
-
-- (BPItem*)createFolderItemWithFolderName:(NSString*)folderName atDirectoryPath:(NSString*)directoryPath {
-	NSString *fullDirectoryPath = [NSString stringWithFormat:@"%@/%@", directoryPath, folderName];
-	BOOL directoryCreated = [[NSFileManager defaultManager] createDirectoryAtPath:fullDirectoryPath attributes:nil];
-	BPItem *item = nil;
-	if (directoryCreated) {
-		item = [[BPItem alloc] init];
-		item.name = folderName;
-		item.path = fullDirectoryPath;
-		item.type = BPItemPropertyTypeFolder;
-	}
-	return [item autorelease];
-}
-
-- (BPItem*)fileItemFromPath:(NSString*)path {
-	BPItem *item = nil;
-	BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
-	if (fileExists) {
-		item = [[BPItem alloc] init];
-		item.name = [path lastPathComponent];
-		item.path = path;
-		item.type = BPItemPropertyTypeFile;
-	}
-	return [item autorelease];	
-}
-
-- (BPItem*)folderItemFromPath:(NSString*)path {
-	BPItem *item = nil;
-	BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
-	if (fileExists) {
-		item = [[BPItem alloc] init];
-		item.name = [path lastPathComponent];
-		item.path = path;
-		item.type = BPItemPropertyTypeFolder;
-	}
-	return [item autorelease];	
-}
-
-
-- (BPItem*)createDefaultFileItemAtCurrentDisplayedDirectoryPath {
-	NSString *fileName = [self nextDefaultFileNameForCurrentDisplayedDirectoryPath];
-	return [self createFileItemWithFileName:fileName atDirectoryPath:currentDisplayedDirectoryPath];
-}
-
-- (BOOL)saveItem:(BPItem*)item withText:(NSString*)text error:(NSError**)err {
-	return [text writeToFile:item.path atomically:YES encoding:NSUTF8StringEncoding error:err];
-}
-
-- (BOOL)deleteItem:(BPItem*)item {
-	NSError *err;
-	return [[NSFileManager defaultManager] removeItemAtPath:item.path error:&err];
 }
 
 - (NSString*)pushDirectoryName:(NSString*)directoryName {
@@ -196,6 +209,12 @@ BPItemManager *sharedInstance = nil;
 	return [self nextDefaultFolderNameAtDirectoryPath:currentDisplayedDirectoryPath];
 }
 
+#pragma mark -
+#pragma mark Item Manipulation
+
+- (BOOL)saveItem:(BPItem*)item withText:(NSString*)text error:(NSError**)err {
+	return [text writeToFile:item.path atomically:YES encoding:NSUTF8StringEncoding error:err];
+}
 
 - (BPItem*)renameFileItemFromPath:(NSString*)fromPath toPath:(NSString*)toPath {
 	NSError *err;
@@ -206,7 +225,7 @@ BPItemManager *sharedInstance = nil;
 - (BPItem*)moveItem:(BPItem*)item toPath:(NSString*)path {
 	NSError *err;
 	BOOL moved = [[NSFileManager defaultManager] moveItemAtPath:item.path toPath:path error:&err];
-	if (moved) {
+	if (!moved) {
 		//TODO: add error logic
 	}
 	
@@ -217,6 +236,11 @@ BPItemManager *sharedInstance = nil;
 		newItem = [self folderItemFromPath:path];
 	}
 	return newItem;
+}
+
+- (BOOL)deleteItem:(BPItem*)item {
+	NSError *err;
+	return [[NSFileManager defaultManager] removeItemAtPath:item.path error:&err];
 }
 
 @end

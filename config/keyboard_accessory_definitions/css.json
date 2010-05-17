@@ -1,0 +1,18 @@
+{
+	"type": "css",
+	
+	"extensions": [
+		"css"
+	],
+	
+	"keys": [
+		{
+			"label": "{"
+			"text": "{"
+		},
+		{
+			"label": "}"
+			"text": "}"
+		}
+	]
+}

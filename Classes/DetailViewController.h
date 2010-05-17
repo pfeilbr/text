@@ -14,6 +14,7 @@
 #import "BPItem.h"
 #import "SettingsTableViewController.h"
 #import "NewItemViewController.h"
+#import "BPConfig.h"
 
 @class RootViewController;
 
@@ -25,12 +26,13 @@
 	UITextField *itemLabelTextField;
 	UILabel *detailDescriptionLabel;
 	BPTextView *textView;
-	UIView *keyboardAccessoryView;
+	UIView *inputAccessoryView;
 	BPItem *item;
 	RootViewController *rootViewController;
 	UIBarButtonItem *actionsButton;
 	UIActionSheet *actionSheet;
 	UIBarButtonItem *settingsButton;
+	NSMutableDictionary *inputAccessoryViewCache;
 }
 
 @property (nonatomic, retain) IBOutlet UIToolbar *toolbar;
@@ -39,7 +41,7 @@
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *itemLabelBarButtonItem;
 @property (nonatomic, retain) IBOutlet UILabel *detailDescriptionLabel;
 @property (nonatomic, retain) IBOutlet BPTextView *textView;
-@property (nonatomic, retain) IBOutlet UIView *keyboardAccessoryView;
+@property (nonatomic, retain) IBOutlet UIView *inputAccessoryView;
 @property (nonatomic, retain) IBOutlet BPItem *item;
 @property (nonatomic, assign) IBOutlet RootViewController *rootViewController;
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *actionsButton;
@@ -51,7 +53,9 @@
 - (void)addNewFile:(NSNotification*)notification;
 - (void)renameFile:(NSNotification*)notification;
 - (void)addNewFolder:(NSNotification*)notification;
+- (void)renameFolder:(NSNotification*)notification;
 - (void)editItemLabel;
+- (UIView*)inputAccessoryViewForItem:(BPItem*)item;
 - (IBAction)actionsButtonPressed:(id)sender;
 - (IBAction)settingsButtonPressed:(id)sender;
 

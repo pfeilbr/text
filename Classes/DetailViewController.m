@@ -22,12 +22,15 @@ enum TextViewActions {
 - (void)saveItemLabel;
 - (void)renameItem;
 - (void)clear;
+- (void)inputAccessoryViewButtonClicked:(id)sender;
+
+@property (nonatomic, retain) NSMutableDictionary *inputAccessoryViewCache;
 @end
 
 
 @implementation DetailViewController
 
-@synthesize toolbar, itemLabel, itemLabelTextField, itemLabelBarButtonItem, popoverController, detailDescriptionLabel, textView, keyboardAccessoryView, rootViewController, actionsButton, actionSheet, settingsButton;
+@synthesize toolbar, itemLabel, itemLabelTextField, itemLabelBarButtonItem, popoverController, detailDescriptionLabel, textView, inputAccessoryView, rootViewController, actionsButton, actionSheet, settingsButton, inputAccessoryViewCache;
 @synthesize item;
 
 #pragma mark ActionSheet Delegate
@@ -41,6 +44,9 @@ enum TextViewActions {
 	if ([buttonTitle isEqualToString:BPItemActionRenameFile]) {
 		NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObject:item forKey:kKeyItem];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BPRenameFileNotification object:dict];			
+	} else if ([buttonTitle isEqualToString:BPItemActionRenameFolder]) {
+		NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObject:@"" forKey:kKeyItem];
+		[[NSNotificationCenter defaultCenter] postNotificationName:BPRenameFolderNotification object:dict];		
 	} else if ([buttonTitle isEqualToString:BPItemActionEmailFile]) {
 		NSString *body = [item contents];
 		MFMailComposeViewController *vc = [[MFMailComposeViewController alloc] init];
@@ -124,6 +130,28 @@ enum TextViewActions {
 	[nivc release];		
 }
 
+- (void)renameFolder:(NSNotification*)notification {
+	//NSArray *viewControllers = rootViewController.navigationController.viewControllers;
+	UIViewController *vc = rootViewController.navigationController.topViewController;
+	BPItem *item1 = ((ItemTableViewController*)vc).currentSelectedItem;
+	NSDictionary *_dict = [NSDictionary dictionaryWithObject:item1 forKey:kKeyItem];
+	NSNotification *_notification = [NSNotification notificationWithName:[notification name] object:_dict];
+	
+	NSDictionary *dict = [_notification object];
+	BPItem *_item = [dict valueForKey:kKeyItem];
+	NewItemViewController *nivc = [[NewItemViewController alloc] initWithNibName:@"NewItemViewController" bundle:nil];
+	nivc.modalPresentationStyle = UIModalPresentationFormSheet;
+	nivc.mode = BPItemPropertyModifyModeRename;
+	nivc.itemType = BPItemPropertyTypeFolder;
+	nivc.titleText = BPRenameFolderTitle;
+	nivc.inputValueText = _item.name;
+	
+	NSMutableDictionary *dataDict = [NSMutableDictionary dictionaryWithObject:_item forKey:kKeyItem];
+	nivc.data = dataDict;
+	
+	[self presentModalViewController:nivc animated:YES];
+	[nivc release];
+}
 
 - (void)addNewFolder:(NSNotification*)notification {
 	[self saveCurrentItem];
@@ -178,12 +206,46 @@ enum TextViewActions {
 	itemLabelTextField.text = item.name;
 	textView.text = [item contents];
 	textView.hidden = NO;
-		
+	textView.inputAccessoryView = [self inputAccessoryViewForItem:_item];
+	
 	if (popoverController != nil) {
 		[popoverController dismissPopoverAnimated:YES];
 	}
 	
 	[[NSUserDefaults standardUserDefaults] setObject:[item dictionaryRepresentation] forKey:BPDefaultsLastItemDisplayed];
+}
+
+- (UIView*)inputAccessoryViewForItem:(BPItem*)_item {
+	if (!inputAccessoryViewCache) {
+		inputAccessoryViewCache = [NSMutableDictionary dictionary];
+	}
+	NSString *fileExtension = [_item.name pathExtension];
+	NSString *fileType = [[BPConfig sharedInstance] typeForFileExtension:fileExtension];
+	
+	//UIView *_inputAccessoryView = [inputAccessoryViewCache valueForKey:fileType];
+	
+
+		NSDictionary *inputAccessoryViewDefinition = [[BPConfig sharedInstance] keyboardAccessoryDefinitionForType:fileType];
+		UIToolbar *_toolbar = (UIToolbar*)[inputAccessoryView viewWithTag:1];
+		NSMutableArray *buttons = [NSMutableArray array];
+		UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+		[buttons addObject:flexibleSpace];
+		NSArray *keyDefinitions = [inputAccessoryViewDefinition valueForKey:@"keys"];
+		for (NSDictionary *keyDefinition in keyDefinitions) {
+			NSString *label = [keyDefinition valueForKey:@"label"];
+			//NSString *text = [keyDefinition valueForKey:@"text"];
+			UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:label style:UIBarButtonItemStyleBordered target:self action:@selector(inputAccessoryViewButtonClicked:)];
+			[buttons addObject:button];
+			[buttons addObject:flexibleSpace];
+		}
+		_toolbar.items = buttons;
+		//[inputAccessoryViewCache setObject:_toolbar forKey:fileType];
+		//_inputAccessoryView = _toolbar;
+	
+	return inputAccessoryView;
+}
+
+- (void)inputAccessoryViewButtonClicked:(id)sender {
 }
 
 - (void)editItemLabel {
@@ -312,13 +374,12 @@ enum TextViewActions {
 															delegate:self
 												  cancelButtonTitle:nil
 											destructiveButtonTitle:nil
-												  otherButtonTitles:BPItemActionRenameFile, BPItemActionEmailFile, BPItemActionCopyFileToClipboard, nil];
+												  otherButtonTitles:BPItemActionRenameFile, BPItemActionRenameFolder, BPItemActionEmailFile, BPItemActionCopyFileToClipboard, nil];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											       selector:@selector(orientationDidChange:)
 													    name:@"UIDeviceOrientationDidChangeNotification"
 													  object:nil];
- 	textView.inputAccessoryView = keyboardAccessoryView;
 	
 	[self clear];
 }
@@ -371,7 +432,7 @@ enum TextViewActions {
 	[itemLabelTextField release];
 	[detailDescriptionLabel release];
 	[textView release];
-	[keyboardAccessoryView release];
+	[inputAccessoryView release];
 	[item release];
 	[actionsButton release];
 	[actionSheet release];

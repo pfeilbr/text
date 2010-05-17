@@ -9,12 +9,16 @@
 
 #define kKeyItem @"item"
 
+#define BPItemPropertyStorageType @"BPItemPropertyStorageType"
 #define BPItemPropertyType @"BPItemPropertyType"
 #define BPItemPropertyName @"BPItemPropertyName"
 #define BPItemPropertyPath @"BPItemPropertyPath"
 
 #define BPItemPropertyModifyModeNew @"BPItemPropertyModifyModeNew"
 #define BPItemPropertyModifyModeRename @"BPItemPropertyModifyModeRename"
+
+#define BPItemPropertyStorageTypeLocalFileSystem @"BPItemPropertyStorageTypeLocalFileSystem"
+#define BPItemPropertyStorageTypeDropbox @"BPItemPropertyStorageTypeDropbox"
 
 #define BPItemPropertyTypeFile @"BPItemPropertyTypeFile"
 #define BPItemPropertyTypeFolder @"BPItemPropertyTypeFolder"
@@ -28,6 +32,7 @@
 #define BPAddNewFileNotification @"BPAddNewFileNotification"
 #define BPRenameFileNotification @"BPRenameFileNotification"
 #define BPAddNewFolderNotification @"BPAddNewFolderNotification"
+#define BPRenameFolderNotification @"BPRenameFolderNotification"
 #define BPItemDeletedNotification @"BPItemDeletedNotification"
 
 #define BPItemActionEmailFile @"Email"
@@ -43,6 +48,7 @@
 #define BPAddNewFileTitle @"File Name"
 #define BPRenameFileTitle @"Rename File"
 #define BPAddNewFolderTitle @"Folder Name"
+#define BPRenameFolderTitle @"Rename Folder"
 
 #define kAddNewFile 0
 #define kAddNewFileFromTemplate 1

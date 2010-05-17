@@ -1,4 +1,11 @@
 {
+	"type": "html",
+	
+	"extensions": [
+		"html",
+		"htm"
+	],
+	
 	"keys": [
 		{
 			"label": "{"

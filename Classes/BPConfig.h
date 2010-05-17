@@ -9,10 +9,12 @@
 #import <Foundation/Foundation.h>
 
 @interface BPConfig : NSObject {
-
+	NSMutableDictionary *keyboardAccessoryDefinitionsCache;
 }
 
 + (BPConfig*)sharedInstance;
+- (NSDictionary*)keyboardAccessoryDefinitions;
 - (id)keyboardAccessoryDefinitionForType:(NSString*)type;
-
+- (id)keyboardAccessoryDefinitionForFileExtension:(NSString*)fileExtesion;
+- (NSString*)typeForFileExtension:(NSString*)fileExtesion;
 @end

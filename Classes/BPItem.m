@@ -8,12 +8,23 @@
 
 #import "BPItem.h"
 
-
 @implementation BPItem
 
-@synthesize type, name, path;
+@synthesize storageType, type, name, path;
+
+- (id)init {
+	if (self = [super init]) {
+		// zero everything out
+		storageType = @"";
+		type = @"";
+		name = @"";
+		path = @"";
+	}
+	return self;
+}
 
 - (void)dealloc {
+	[storageType release];
 	[type release];
 	[name release];
 	[path release];
@@ -36,7 +47,7 @@
 }
 
 - (BOOL)isEqualToItem:(BPItem*)item {
-	return [path isEqualToString:item.path];
+	return [storageType isEqualToString:item.storageType] && [path isEqualToString:item.path];
 }
 
 - (NSComparisonResult)compare:(BPItem*)item {
@@ -53,6 +64,7 @@
 
 - (BPItem*)itemFromDictionary:(NSDictionary*)dictionaryRepresentation {
 	BPItem *item = [[BPItem alloc] init];
+	item.storageType = [dictionaryRepresentation valueForKey:BPItemPropertyStorageType];
 	item.type = [dictionaryRepresentation valueForKey:BPItemPropertyType];
 	item.name = [dictionaryRepresentation valueForKey:BPItemPropertyName];
 	item.path = [dictionaryRepresentation valueForKey:BPItemPropertyPath];
@@ -61,6 +73,7 @@
 
 - (NSDictionary*)dictionaryRepresentation {
 	NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+	[dict setValue:storageType forKey:BPItemPropertyStorageType];
 	[dict setValue:type forKey:BPItemPropertyType];
 	[dict setValue:name forKey:BPItemPropertyName];
 	[dict setValue:path forKey:BPItemPropertyPath];

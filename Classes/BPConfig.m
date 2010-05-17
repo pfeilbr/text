@@ -14,10 +14,21 @@ static BPConfig *sharedInstance = nil;
 - (NSString*)baseDirectoryPath;
 - (NSString*)keyboardAccessoryDefinitionsDirectoryPath;
 - (id)loadConfigFromJSONFileAtPath:(NSString*)path;
+
+@property(nonatomic, retain) NSMutableDictionary *keyboardAccessoryDefinitionsCache;
 @end
 
 
 @implementation BPConfig
+
+@synthesize keyboardAccessoryDefinitionsCache;
+
+- (id)init {
+	if (self = [super init]) {
+		keyboardAccessoryDefinitionsCache = nil;
+	}
+	return self;
+}
 
 + (BPConfig*)sharedInstance {
 	if (sharedInstance == nil) {
@@ -28,6 +39,7 @@ static BPConfig *sharedInstance = nil;
 
 - (void)dealloc {
 	[sharedInstance release];
+	[keyboardAccessoryDefinitionsCache release];
 	[super dealloc];
 }
 
@@ -54,10 +66,47 @@ static BPConfig *sharedInstance = nil;
 	}
 }
 
+- (NSDictionary*)keyboardAccessoryDefinitions {
+	
+	if (keyboardAccessoryDefinitionsCache == nil) {
+		self.keyboardAccessoryDefinitionsCache = [NSMutableDictionary dictionary];
+	} else {
+		return keyboardAccessoryDefinitionsCache;
+	}
+	
+	NSString *inputAccessoryDefinitionsDirectoryPath = [self keyboardAccessoryDefinitionsDirectoryPath];
+	NSError *err;
+	NSArray *contentsOfDirectory = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:inputAccessoryDefinitionsDirectoryPath error:&err];
+	for (NSString *fileName in contentsOfDirectory) {
+		NSString *path = [inputAccessoryDefinitionsDirectoryPath stringByAppendingPathComponent:fileName];
+		id definition = [self loadConfigFromJSONFileAtPath:path];
+		NSString *type = [definition valueForKey:@"type"];
+		[keyboardAccessoryDefinitionsCache setValue:definition forKey:type];
+	}
+	return keyboardAccessoryDefinitionsCache;
+}
+
 - (id)keyboardAccessoryDefinitionForType:(NSString*)type {
-	NSString *fileName = [NSString stringWithFormat:@"%@.%@", type, @"json"];
-	NSString *path = [[self keyboardAccessoryDefinitionsDirectoryPath] stringByAppendingPathComponent:fileName];
-	return [self loadConfigFromJSONFileAtPath:path];
+	return [[self keyboardAccessoryDefinitions] valueForKey:type];
+}
+
+- (id)keyboardAccessoryDefinitionForFileExtension:(NSString*)fileExtesion {
+	NSString *type = [self typeForFileExtension:fileExtesion];
+	return [self keyboardAccessoryDefinitionForType:type];
+}
+
+- (NSString*)typeForFileExtension:(NSString*)fileExtension {
+	NSDictionary *definitions = [self keyboardAccessoryDefinitions];
+	for (NSString *key in definitions) {
+		NSDictionary *definition = [definitions valueForKey:key];
+		NSArray *fileExtensions = [definition valueForKey:@"extensions"];
+		for (NSString *_fileExtension in fileExtensions) {
+			if ([_fileExtension isEqualToString:fileExtension]) {
+				return [definition valueForKey:@"type"];
+			}
+		}
+	}
+	return @"default";
 }
 						  
 @end

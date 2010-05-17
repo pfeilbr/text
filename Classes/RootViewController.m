@@ -17,6 +17,7 @@
 - (void)configureCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath;
 - (void)displayItem:(NSNotification*)notification;
 - (void)addNewFile:(NSNotification*)notification;
+- (void)renameFolder:(NSNotification*)notification;
 @end
 
 
@@ -58,6 +59,12 @@
 											   object:nil];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(renameFolder:)
+												 name:BPRenameFolderNotification
+											   object:nil];
+	
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(selectItemInList:)
 												 name:BPSelectItemInItemListNotification
 											   object:nil];
@@ -89,6 +96,11 @@
 - (void)addNewFolder:(NSNotification*)notification {
 	[detailViewController addNewFolder:notification];	
 }
+
+- (void)renameFolder:(NSNotification*)notification {
+	[detailViewController renameFolder:notification];
+}
+
 
 - (void)selectItemInList:(NSNotification*)notification {
 	NSDictionary *dict = [[notification object] copy];

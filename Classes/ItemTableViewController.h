@@ -17,6 +17,7 @@
 	UIActionSheet *addActionSheet;	
 	NSString *currentDirectoryPath;
 	NSString *searchString;
+	BPItem *currentSelectedItem;
 }
 
 @property BOOL isRootDirectory;
@@ -24,9 +25,11 @@
 @property (nonatomic, retain) IBOutlet UIActionSheet *addActionSheet;
 @property(nonatomic, copy) NSString *currentDirectoryPath;
 @property(nonatomic, copy) NSString *searchString;
+@property(readonly) BPItem *currentSelectedItem;
 
 - (IBAction)addButtonPressed:(id)sender;
 - (void)reload;
 - (void)selectItem:(BPItem*)item;
+
 
 @end

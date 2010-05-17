@@ -1,8 +1,13 @@
+h1. TODOs
+
+* add informational row to bottom of item list that says something like "12 folders & 29 files" just like in Dropbox for iPad
+* add icons/images to items displayed as cells.  look at icons used in dropbox
+
 h1. Features
 
 * -new file-
 * -new folder-
-* rename file & folder
+* -rename file- & folder
 * move file & folder
 * -iTunes file sharing-
 * return to last opened file on application start
