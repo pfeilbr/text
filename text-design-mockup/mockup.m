@@ -6,13 +6,33 @@
 @protocol BPStorageClient <NSObject>
 @optional
 @property(nonatomic, assign) id<BPStorageClientDelegate> delegate;
+- (void)createFile:(NSString*)path fromPath:(NSString*)path;
 - (void)createFolder:(NSString*)path;
+- (void)loadFile:(NSString*)path;
+- (void)deletePath:(NSString*)path;
+- (void)copyFrom:(NSString*)fromPath toPath:(NSString *)toPath;
+- (void)moveFrom:(NSString*)fromPath toPath:(NSString *)toPath;
 @end
 
 @protocol BPStorageClientDelegate <NSObject>
 @optional
+- (void)storageClient:(id<BPStorageClient>)storageClient createdFile:(NSString*)path;
+- (void)storageClient:(id<BPStorageClient>)storageClient createFileFailedWithError:(NSError*)error;
+
 - (void)storageClient:(id<BPStorageClient>)storageClient createdFolder:(NSString*)folder;
 - (void)storageClient:(id<BPStorageClient>)storageClient createFolderFailedWithError:(NSError*)error;
+
+- (void)storageClient:(id<BPStorageClient>)storageClient loadedFile:(NSString*)path data:(NSData*)data;
+- (void)storageClient:(id<BPStorageClient>)storageClient loadFileFailedWithError:(NSError*)error;
+
+- (void)storageClient:(id<BPStorageClient>)storageClient deletedPath:(NSString*)path;
+- (void)storageClient:(id<BPStorageClient>)storageClient deletePathFailedWithError:(NSError*)error;
+
+- (void)storageClient:(id<BPStorageClient>)storageClient copiedPath:(NSString*)fromPath toPath:(NSString*)toPath;
+- (void)storageClient:(id<BPStorageClient>)storageClient copyPathFailedWithError:(NSError*)error;
+
+- (void)storageClient:(id<BPStorageClient>)storageClient movedPath:(NSString*)fromPath toPath:(NSString*)toPath;
+- (void)storageClient:(id<BPStorageClient>)storageClient movePathFailedWithError:(NSError*)error;
 @end
 
 
@@ -108,7 +128,8 @@
 static BPItemManager* defaultManager = nil;
 
 @interface BPItemManager()
-- (BPBaseStorageClient*)storageClientForPath:(NSString*)path;
+- (BPBaseStorageClient*)storageClientForURL:(NSString*)url;
+- (NSString*)storageClientPathForURL:(NSString*)url;
 @end
 
 @implementation BPItemManager
@@ -168,14 +189,20 @@ static BPItemManager* defaultManager = nil;
 @property(nonatomic, retain) BPItemManager* itemManager;
 @end
 
-
 @implementation AppDelegate
 
 @synthesize itemManager;
 
+- (id)init {
+	if (self = [super init]) {
+		self.itemManager = [[BPItemManager alloc] init];
+		itemManager.delegate = self;
+	}
+	return self;
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-	self.itemManager = [[BPItemManager alloc] init];
-	[itemManager createFolder:@"file:///private/etc/deleteme"];	
+	[itemManager createFolder:@"file:///tmp/deleteme01"];	
 }
 
 - (void)storageClient:(id<BPStorageClient>)storageClient createdFolder:(NSString*)folder {
