@@ -15,7 +15,7 @@
 	BOOL isRootDirectory;
 	UIBarButtonItem *addButton;	
 	UIActionSheet *addActionSheet;	
-	NSString *currentDirectoryPath;
+	BPItem *currentDirectoryItem;
 	NSString *searchString;
 	BPItem *currentSelectedItem;
 }
@@ -23,9 +23,9 @@
 @property BOOL isRootDirectory;
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *addButton;
 @property (nonatomic, retain) IBOutlet UIActionSheet *addActionSheet;
-@property(nonatomic, copy) NSString *currentDirectoryPath;
+@property(nonatomic, retain) BPItem *currentDirectoryItem;
 @property(nonatomic, copy) NSString *searchString;
-@property(readonly) BPItem *currentSelectedItem;
+@property(nonatomic, retain) BPItem *currentSelectedItem;
 
 - (IBAction)addButtonPressed:(id)sender;
 - (void)reload;

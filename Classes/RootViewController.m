@@ -72,7 +72,7 @@
 	ItemTableViewController *itvc = [[ItemTableViewController alloc] initWithNibName:@"ItemTableViewController" bundle:nil];
 	itvc.isRootDirectory = YES;
 	itvc.title = @"Files";
-	itvc.currentDirectoryPath = [BPItemManager sharedInstance].currentDisplayedDirectoryPath;
+	itvc.currentDirectoryItem = [BPItemManager sharedInstance].currentDisplayedDirectoryItem;
 	[self.navigationController pushViewController:itvc animated:YES];	
 	[itvc release];
 		
@@ -192,7 +192,7 @@
 
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
 	ItemTableViewController *itvc = (ItemTableViewController*)viewController;
-	[BPItemManager sharedInstance].currentDisplayedDirectoryPath = itvc.currentDirectoryPath;
+	[BPItemManager sharedInstance].currentDisplayedDirectoryItem = itvc.currentDirectoryItem;
 }
 
 #pragma mark -

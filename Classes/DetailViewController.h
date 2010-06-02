@@ -33,6 +33,7 @@
 	UIActionSheet *actionSheet;
 	UIBarButtonItem *settingsButton;
 	NSMutableDictionary *inputAccessoryViewCache;
+	NSDictionary *inputAccessoryViewDefinition;
 }
 
 @property (nonatomic, retain) IBOutlet UIToolbar *toolbar;
@@ -47,6 +48,7 @@
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *actionsButton;
 @property (nonatomic, retain) IBOutlet UIActionSheet *actionSheet;
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *settingsButton;
+@property (nonatomic, retain) NSDictionary *inputAccessoryViewDefinition;
 
 - (void)setDetailItem:(BPItem*)item;
 - (void)saveCurrentItem;

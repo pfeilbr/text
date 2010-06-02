@@ -7,6 +7,9 @@
  *
  */
 
+#define BPDropboxConsumerKey = @"0ccay36sixvrbmc";
+#define BPDropboxConsumerSecret = @"arg6tcbel4m08zr";
+
 #define kKeyItem @"item"
 
 #define BPItemPropertyStorageType @"BPItemPropertyStorageType"
@@ -17,6 +20,7 @@
 #define BPItemPropertyModifyModeNew @"BPItemPropertyModifyModeNew"
 #define BPItemPropertyModifyModeRename @"BPItemPropertyModifyModeRename"
 
+#define BPItemPropertyStorageTypeRoot @"BPItemPropertyStorageTypeRoot"
 #define BPItemPropertyStorageTypeLocalFileSystem @"BPItemPropertyStorageTypeLocalFileSystem"
 #define BPItemPropertyStorageTypeDropbox @"BPItemPropertyStorageTypeDropbox"
 

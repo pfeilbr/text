@@ -15,7 +15,7 @@
 
 @implementation ItemTableViewController
 
-@synthesize isRootDirectory, addButton, addActionSheet, currentDirectoryPath, searchString, currentSelectedItem;
+@synthesize isRootDirectory, addButton, addActionSheet, currentDirectoryItem, searchString, currentSelectedItem;
 
 #pragma mark -
 #pragma mark View lifecycle
@@ -28,6 +28,7 @@
 	UIBarButtonItem *_deleteButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:nil action:nil];
 	NSArray *buttons = [NSArray arrayWithObjects:self.addButton, _flexibleSpaceButton, _deleteButton, nil];
 	[self setToolbarItems:buttons animated:NO];
+	[buttons release];
 	[_flexibleSpaceButton release];
 	[_deleteButton release];
 	
@@ -47,7 +48,7 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-	[BPItemManager sharedInstance].currentDisplayedDirectoryPath = self.currentDirectoryPath;
+	[BPItemManager sharedInstance].currentDisplayedDirectoryItem = self.currentDirectoryItem;
 	[self reload];
 	[super viewWillAppear:animated];
 }
@@ -124,7 +125,8 @@
         // Delete the row from the data source
 		NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
 		BPItem *item = [_items objectAtIndex:indexPath.row];
-		[[BPItemManager sharedInstance] deleteItem:item];
+		NSError *err;
+		[[BPItemManager sharedInstance] deleteItem:item error:&err];
 		[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:YES];
 
 		NSMutableDictionary *dict = [NSMutableDictionary dictionary];
@@ -173,7 +175,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	NSArray *_items = [[BPItemManager sharedInstance] itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:searchString];
 	BPItem *item = [_items objectAtIndex:indexPath.row];
-	currentSelectedItem = item;
+	self.currentSelectedItem = item;
 	
 	if ([item.type isEqualToString:BPItemPropertyTypeFile]) {
 		NSMutableDictionary *dict = [NSMutableDictionary dictionary];
@@ -197,7 +199,7 @@
 	if ([item.type isEqualToString:BPItemPropertyTypeFolder]) {
 		ItemTableViewController *itvc = [[ItemTableViewController alloc] initWithNibName:@"ItemTableViewController" bundle:nil];
 		itvc.title = item.name;
-		itvc.currentDirectoryPath = [[BPItemManager sharedInstance] pushDirectoryName:item.name];
+		itvc.currentDirectoryItem = [[BPItemManager sharedInstance] pushDirectoryItem:item];
 		[self.navigationController pushViewController:itvc animated:YES];	
 		[itvc release];
 	}	
@@ -302,7 +304,7 @@
 - (void)dealloc {
 	[addButton release];
 	[addActionSheet release];
-	[currentDirectoryPath release];
+	[currentDirectoryItem release];
 	[searchString release];
     [super dealloc];
 }

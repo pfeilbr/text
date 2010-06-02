@@ -33,15 +33,18 @@
 		
 	// create item
 	NSString *itemName = inputValueTextField.text;
-	NSString *currentDisplayedDirectoryPath = [[BPItemManager sharedInstance] currentDisplayedDirectoryPath];
+	BPItem *currentDisplayedDirectoryItem = [BPItemManager sharedInstance].currentDisplayedDirectoryItem;
+	NSString *currentDisplayedDirectoryPath = currentDisplayedDirectoryItem.path;
 	
 	BPItem *item = nil;
+	NSError *err;	
 	
 	if ([mode isEqualToString:BPItemPropertyModifyModeNew]) {
+
 		if ([itemType isEqualToString:BPItemPropertyTypeFile]) {
-			item = [[BPItemManager sharedInstance] createFileItemWithFileName:itemName atDirectoryPath:currentDisplayedDirectoryPath];		
+			item = [[BPItemManager sharedInstance] createFileItemWithFileName:itemName atDirectoryPath:currentDisplayedDirectoryPath storageType:currentDisplayedDirectoryItem.storageType error:&err];		
 		} else if ([itemType isEqualToString:BPItemPropertyTypeFolder]) {
-			item = [[BPItemManager sharedInstance] createFolderItemWithFolderName:itemName atDirectoryPath:currentDisplayedDirectoryPath];
+			item = [[BPItemManager sharedInstance] createFolderItemWithFolderName:itemName atDirectoryPath:currentDisplayedDirectoryPath storageType:currentDisplayedDirectoryItem.storageType error:&err];
 		}		
 	} else if ([mode isEqualToString:BPItemPropertyModifyModeRename]) {
 		BPItem *_item = [data valueForKey:kKeyItem];
@@ -51,7 +54,7 @@
 		} else if ([_item.type isEqualToString:BPItemPropertyTypeFolder]) {
 			path = [[_item.path stringByDeletingLastPathComponent] stringByAppendingPathComponent:itemName];
 		}
-		item = [[BPItemManager sharedInstance] moveItem:_item toPath:(NSString*)path];
+		item = [[BPItemManager sharedInstance] moveItem:_item toPath:(NSString*)path error:&err];
 	}
 		
 	[self dismissModalViewControllerAnimated:YES];

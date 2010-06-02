@@ -56,6 +56,7 @@
 		C534D9D1118F006C001A4856 /* BPConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = C534D9D0118F006C001A4856 /* BPConfig.m */; };
 		C534DA0F118F02E3001A4856 /* www in Resources */ = {isa = PBXBuildFile; fileRef = C534DA00118F02E3001A4856 /* www */; };
 		C534DA1B118F03E9001A4856 /* config in Resources */ = {isa = PBXBuildFile; fileRef = C534DA14118F03E9001A4856 /* config */; };
+		C535BFFA11B483D700B4C6E7 /* BPDropboxItemStore.m in Sources */ = {isa = PBXBuildFile; fileRef = C535BFF811B483D700B4C6E7 /* BPDropboxItemStore.m */; };
 		C537AB6F11904507005EC707 /* NewItemViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C537AB6D11904507005EC707 /* NewItemViewController.m */; };
 		C537AB7011904507005EC707 /* NewItemViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = C537AB6E11904507005EC707 /* NewItemViewController.xib */; };
 		C5453C6811A1D7FB00B117BE /* DBRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = C5453C2F11A1D7FB00B117BE /* DBRequest.m */; };
@@ -79,10 +80,13 @@
 		C5453C8011A1D7FB00B117BE /* NSURL+MPURLParameterAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = C5453C6511A1D7FB00B117BE /* NSURL+MPURLParameterAdditions.m */; };
 		C5453C8111A1D7FB00B117BE /* NSURLResponse+Encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = C5453C6711A1D7FB00B117BE /* NSURLResponse+Encoding.m */; };
 		C5453C9811A1D87500B117BE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5453C9711A1D87500B117BE /* Security.framework */; };
+		C5453CF711A212D800B117BE /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5453CF611A212D800B117BE /* MobileCoreServices.framework */; };
 		C599DB4F118915DC006E9CB3 /* BPTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = C599DB4E118915DC006E9CB3 /* BPTextView.m */; };
 		C599DB731189B5BC006E9CB3 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C599DB721189B5BC006E9CB3 /* MessageUI.framework */; };
 		C599DC381189FE14006E9CB3 /* BPItemManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C599DC371189FE14006E9CB3 /* BPItemManager.m */; };
 		C599DC411189FEC4006E9CB3 /* BPItem.m in Sources */ = {isa = PBXBuildFile; fileRef = C599DC401189FEC4006E9CB3 /* BPItem.m */; };
+		C5D43D6511AC9A64002A55C8 /* BPFileSystemItemStore.m in Sources */ = {isa = PBXBuildFile; fileRef = C5D43D6411AC9A64002A55C8 /* BPFileSystemItemStore.m */; };
+		C5D43D6E11AC9C90002A55C8 /* BPBaseItemStore.m in Sources */ = {isa = PBXBuildFile; fileRef = C5D43D6D11AC9C90002A55C8 /* BPBaseItemStore.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -170,6 +174,8 @@
 		C534D9D0118F006C001A4856 /* BPConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BPConfig.m; sourceTree = "<group>"; };
 		C534DA00118F02E3001A4856 /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
 		C534DA14118F03E9001A4856 /* config */ = {isa = PBXFileReference; lastKnownFileType = folder; path = config; sourceTree = "<group>"; };
+		C535BFF811B483D700B4C6E7 /* BPDropboxItemStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BPDropboxItemStore.m; sourceTree = "<group>"; };
+		C535BFF911B483D700B4C6E7 /* BPDropboxItemStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BPDropboxItemStore.h; sourceTree = "<group>"; };
 		C537AB6C11904507005EC707 /* NewItemViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewItemViewController.h; sourceTree = "<group>"; };
 		C537AB6D11904507005EC707 /* NewItemViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewItemViewController.m; sourceTree = "<group>"; };
 		C537AB6E11904507005EC707 /* NewItemViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewItemViewController.xib; sourceTree = "<group>"; };
@@ -216,6 +222,7 @@
 		C5453C6611A1D7FB00B117BE /* NSURLResponse+Encoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLResponse+Encoding.h"; sourceTree = "<group>"; };
 		C5453C6711A1D7FB00B117BE /* NSURLResponse+Encoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLResponse+Encoding.m"; sourceTree = "<group>"; };
 		C5453C9711A1D87500B117BE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		C5453CF611A212D800B117BE /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		C599DB4D118915DC006E9CB3 /* BPTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BPTextView.h; sourceTree = "<group>"; };
 		C599DB4E118915DC006E9CB3 /* BPTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BPTextView.m; sourceTree = "<group>"; };
 		C599DB721189B5BC006E9CB3 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
@@ -224,6 +231,10 @@
 		C599DC371189FE14006E9CB3 /* BPItemManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BPItemManager.m; sourceTree = "<group>"; };
 		C599DC3F1189FEC4006E9CB3 /* BPItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BPItem.h; sourceTree = "<group>"; };
 		C599DC401189FEC4006E9CB3 /* BPItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BPItem.m; sourceTree = "<group>"; };
+		C5D43D6311AC9A64002A55C8 /* BPFileSystemItemStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BPFileSystemItemStore.h; sourceTree = "<group>"; };
+		C5D43D6411AC9A64002A55C8 /* BPFileSystemItemStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BPFileSystemItemStore.m; sourceTree = "<group>"; };
+		C5D43D6C11AC9C90002A55C8 /* BPBaseItemStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BPBaseItemStore.h; sourceTree = "<group>"; };
+		C5D43D6D11AC9C90002A55C8 /* BPBaseItemStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BPBaseItemStore.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -240,6 +251,7 @@
 				C534D791118B7B68001A4856 /* SystemConfiguration.framework in Frameworks */,
 				C534D797118B7B96001A4856 /* libz.1.2.3.dylib in Frameworks */,
 				C5453C9811A1D87500B117BE /* Security.framework in Frameworks */,
+				C5453CF711A212D800B117BE /* MobileCoreServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +261,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				C535BFF811B483D700B4C6E7 /* BPDropboxItemStore.m */,
+				C535BFF911B483D700B4C6E7 /* BPDropboxItemStore.h */,
 				C5453C2D11A1D7FB00B117BE /* DropboxSDK */,
 				C534D7BD118B7C7A001A4856 /* cocoahttpserver */,
 				C534D798118B7BBC001A4856 /* ZipArchive */,
@@ -278,6 +292,10 @@
 				C537AB6C11904507005EC707 /* NewItemViewController.h */,
 				C537AB6D11904507005EC707 /* NewItemViewController.m */,
 				C537AB6E11904507005EC707 /* NewItemViewController.xib */,
+				C5D43D6311AC9A64002A55C8 /* BPFileSystemItemStore.h */,
+				C5D43D6411AC9A64002A55C8 /* BPFileSystemItemStore.m */,
+				C5D43D6C11AC9C90002A55C8 /* BPBaseItemStore.h */,
+				C5D43D6D11AC9C90002A55C8 /* BPBaseItemStore.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -341,6 +359,7 @@
 				C534D790118B7B68001A4856 /* SystemConfiguration.framework */,
 				C534D796118B7B96001A4856 /* libz.1.2.3.dylib */,
 				C5453C9711A1D87500B117BE /* Security.framework */,
+				C5453CF611A212D800B117BE /* MobileCoreServices.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -621,6 +640,9 @@
 				C5453C7F11A1D7FB00B117BE /* NSString+URLEscapingAdditions.m in Sources */,
 				C5453C8011A1D7FB00B117BE /* NSURL+MPURLParameterAdditions.m in Sources */,
 				C5453C8111A1D7FB00B117BE /* NSURLResponse+Encoding.m in Sources */,
+				C5D43D6511AC9A64002A55C8 /* BPFileSystemItemStore.m in Sources */,
+				C5D43D6E11AC9C90002A55C8 /* BPBaseItemStore.m in Sources */,
+				C535BFFA11B483D700B4C6E7 /* BPDropboxItemStore.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

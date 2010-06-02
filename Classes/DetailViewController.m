@@ -9,6 +9,8 @@
 #import "DetailViewController.h"
 #import "RootViewController.h"
 #import "TextAppDelegate.h"
+#import <MobileCoreServices/UTCoreTypes.h>
+
 
 enum TextViewActions {
 	EMAIL,
@@ -23,6 +25,7 @@ enum TextViewActions {
 - (void)renameItem;
 - (void)clear;
 - (void)inputAccessoryViewButtonClicked:(id)sender;
+- (NSDictionary*)inputAccessoryViewDefinitionForItem:(BPItem*)_item;
 
 @property (nonatomic, retain) NSMutableDictionary *inputAccessoryViewCache;
 @end
@@ -31,7 +34,7 @@ enum TextViewActions {
 @implementation DetailViewController
 
 @synthesize toolbar, itemLabel, itemLabelTextField, itemLabelBarButtonItem, popoverController, detailDescriptionLabel, textView, inputAccessoryView, rootViewController, actionsButton, actionSheet, settingsButton, inputAccessoryViewCache;
-@synthesize item;
+@synthesize item, inputAccessoryViewDefinition;
 
 #pragma mark ActionSheet Delegate
 
@@ -46,7 +49,7 @@ enum TextViewActions {
 		[[NSNotificationCenter defaultCenter] postNotificationName:BPRenameFileNotification object:dict];			
 	} else if ([buttonTitle isEqualToString:BPItemActionRenameFolder]) {
 		NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObject:@"" forKey:kKeyItem];
-		[[NSNotificationCenter defaultCenter] postNotificationName:BPRenameFolderNotification object:dict];		
+		[[NSNotificationCenter defaultCenter] postNotificationName:BPRenameFolderNotification object:dict];
 	} else if ([buttonTitle isEqualToString:BPItemActionEmailFile]) {
 		NSString *body = [item contents];
 		MFMailComposeViewController *vc = [[MFMailComposeViewController alloc] init];
@@ -94,8 +97,9 @@ enum TextViewActions {
 
 - (void)renameItem {
 	[self saveItemLabel];
-	NSString *toPath = [[BPItemManager sharedInstance].currentDisplayedDirectoryPath stringByAppendingPathComponent:itemLabel.text];
-	BPItem *_item = [[BPItemManager sharedInstance] renameFileItemFromPath:item.path toPath:toPath];
+	NSString *toPath = [[BPItemManager sharedInstance].currentDisplayedDirectoryItem.path stringByAppendingPathComponent:itemLabel.text];
+	NSError *err;
+	BPItem *_item = [[BPItemManager sharedInstance] moveItem:item toPath:toPath error:&err];
 	[self setDetailItem:_item];
 	
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObject:_item forKey:kKeyItem];
@@ -207,6 +211,7 @@ enum TextViewActions {
 	textView.text = [item contents];
 	textView.hidden = NO;
 	textView.inputAccessoryView = [self inputAccessoryViewForItem:_item];
+	self.inputAccessoryViewDefinition = [self inputAccessoryViewDefinitionForItem:_item];
 	
 	if (popoverController != nil) {
 		[popoverController dismissPopoverAnimated:YES];
@@ -219,33 +224,50 @@ enum TextViewActions {
 	if (!inputAccessoryViewCache) {
 		inputAccessoryViewCache = [NSMutableDictionary dictionary];
 	}
-	NSString *fileExtension = [_item.name pathExtension];
-	NSString *fileType = [[BPConfig sharedInstance] typeForFileExtension:fileExtension];
-	
-	//UIView *_inputAccessoryView = [inputAccessoryViewCache valueForKey:fileType];
-	
-
-		NSDictionary *inputAccessoryViewDefinition = [[BPConfig sharedInstance] keyboardAccessoryDefinitionForType:fileType];
-		UIToolbar *_toolbar = (UIToolbar*)[inputAccessoryView viewWithTag:1];
-		NSMutableArray *buttons = [NSMutableArray array];
-		UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+	NSDictionary *_inputAccessoryViewDefinition = [self inputAccessoryViewDefinitionForItem:_item];
+	UIToolbar *_toolbar = (UIToolbar*)[inputAccessoryView viewWithTag:1];
+	NSMutableArray *buttons = [NSMutableArray array];
+	UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+	[buttons addObject:flexibleSpace];
+	NSArray *keyDefinitions = [_inputAccessoryViewDefinition valueForKey:@"keys"];
+	for (NSDictionary *keyDefinition in keyDefinitions) {
+		NSString *label = [keyDefinition valueForKey:@"label"];
+		//NSString *text = [keyDefinition valueForKey:@"text"];
+		UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:label style:UIBarButtonItemStyleBordered target:self action:@selector(inputAccessoryViewButtonClicked:)];
+		[buttons addObject:button];
 		[buttons addObject:flexibleSpace];
-		NSArray *keyDefinitions = [inputAccessoryViewDefinition valueForKey:@"keys"];
-		for (NSDictionary *keyDefinition in keyDefinitions) {
-			NSString *label = [keyDefinition valueForKey:@"label"];
-			//NSString *text = [keyDefinition valueForKey:@"text"];
-			UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:label style:UIBarButtonItemStyleBordered target:self action:@selector(inputAccessoryViewButtonClicked:)];
-			[buttons addObject:button];
-			[buttons addObject:flexibleSpace];
-		}
-		_toolbar.items = buttons;
-		//[inputAccessoryViewCache setObject:_toolbar forKey:fileType];
-		//_inputAccessoryView = _toolbar;
+	}
+	_toolbar.items = buttons;
 	
 	return inputAccessoryView;
 }
 
+- (NSDictionary*)inputAccessoryViewDefinitionForItem:(BPItem*)_item {
+	NSString *fileExtension = [_item.name pathExtension];
+	NSString *fileType = [[BPConfig sharedInstance] typeForFileExtension:fileExtension];	
+	NSDictionary *_inputAccessoryViewDefinition = [[BPConfig sharedInstance] keyboardAccessoryDefinitionForType:fileType];
+	return _inputAccessoryViewDefinition;
+}
+
 - (void)inputAccessoryViewButtonClicked:(id)sender {
+	UIBarButtonItem *barButtonItem = (UIBarButtonItem*)sender;
+	NSString *label = barButtonItem.title;
+	NSString *text = @"";
+	NSArray *keys = [inputAccessoryViewDefinition valueForKey:@"keys"];
+	for (NSDictionary *key in keys){
+		if ([label isEqualToString:[key valueForKey:@"label"]]) {
+			text = [key valueForKey:@"text"];
+		}
+	}
+	UIPasteboard *pb = [UIPasteboard generalPasteboard];
+	NSString *savedString = pb.string;
+	[pb setValue:text forPasteboardType:(NSString*)kUTTypeUTF8PlainText];
+	[textView paste:self];
+	
+	// restore previous contents of pastborad back
+	if (savedString != nil) {
+		[pb setValue:savedString forPasteboardType:(NSString*)kUTTypeUTF8PlainText];
+	}
 }
 
 - (void)editItemLabel {

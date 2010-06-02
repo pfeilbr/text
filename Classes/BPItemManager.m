@@ -7,21 +7,25 @@
 //
 
 #import "BPItemManager.h"
+#import "BPFileSystemItemStore.h"
+#import "BPDropboxItemStore.h"
 
 BPItemManager *sharedInstance = nil;
 
 @interface BPItemManager()
 - (NSString*)itemRootDirectory;
+- (id)itemStoreForItem:(BPItem*)item;
+- (id)itemStoreForStorageType:(NSString*)storageType;
 @end
 
 
 @implementation BPItemManager
 
-@synthesize currentDisplayedDirectoryPath;
+@synthesize currentDisplayedDirectoryItem;
 
 - (id)init {
 	if (self = [super init]) {
-		self.currentDisplayedDirectoryPath = [self itemRootDirectory];
+		self.currentDisplayedDirectoryItem = [self rootItem];
 	}
 	return self;
 }
@@ -34,7 +38,7 @@ BPItemManager *sharedInstance = nil;
 }
 
 - (void)dealloc {
-	[currentDisplayedDirectoryPath release];
+	[currentDisplayedDirectoryItem release];
 	[sharedInstance release];
 	[super dealloc];
 }
@@ -58,56 +62,37 @@ BPItemManager *sharedInstance = nil;
 	return [item autorelease];
 }
 
-- (BPItem*)fileItemFromPath:(NSString*)path {
+- (BPItem*)fileItemFromPath:(NSString*)path storageType:(NSString*)storageType {
 	BPItem *item = nil;
 	BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
 	if (fileExists) {
 		item = [self fileItem];
 		item.name = [path lastPathComponent];
 		item.path = path;
+		item.storageType = storageType;
 	}
 	return item;
 }
 
-- (BPItem*)folderItemFromPath:(NSString*)path {
+- (BPItem*)folderItemFromPath:(NSString*)path storageType:(NSString*)storageType {
 	BPItem *item = nil;
 	BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
 	if (fileExists) {
 		item = [self folderItem];
 		item.name = [path lastPathComponent];
 		item.path = path;
+		item.storageType = storageType;
 	}
 	return item;
 }
 
-- (BPItem*)createFileItemWithFileName:(NSString*)fileName atDirectoryPath:(NSString*)directoryPath {
-	NSString *filePath = [NSString stringWithFormat:@"%@/%@", directoryPath, fileName];
-	NSData *data = [NSData data];
-	BOOL fileCreated = [[NSFileManager defaultManager] createFileAtPath:filePath contents:data attributes:nil];
-	if (fileCreated) {
-		return [self fileItemFromPath:filePath];
-	} else {
-		//TODO: error handling here
-		return nil;
-	}
+- (BPItem*)createFileItemWithFileName:(NSString*)fileName atDirectoryPath:(NSString*)directoryPath storageType:(NSString*)storageType error:(NSError**)err {
+	return [[self itemStoreForStorageType:storageType] createFileItemWithFileName:fileName atDirectoryPath:directoryPath error:err];
 }
 
-- (BPItem*)createFolderItemWithFolderName:(NSString*)folderName atDirectoryPath:(NSString*)directoryPath {
-	NSString *fullDirectoryPath = [NSString stringWithFormat:@"%@/%@", directoryPath, folderName];
-	BOOL directoryCreated = [[NSFileManager defaultManager] createDirectoryAtPath:fullDirectoryPath attributes:nil];
-	if (directoryCreated) {
-		return [self folderItemFromPath:fullDirectoryPath];
-	} else {
-		//TODO: error handling here
-		return nil;
-	}
+- (BPItem*)createFolderItemWithFolderName:(NSString*)folderName atDirectoryPath:(NSString*)directoryPath  storageType:(NSString*)storageType error:(NSError**)err {
+	return [[self itemStoreForStorageType:storageType] createFolderItemWithFolderName:folderName atDirectoryPath:directoryPath error:err];	
 }
-
-- (BPItem*)createDefaultFileItemAtCurrentDisplayedDirectoryPath {
-	NSString *fileName = [self nextDefaultFileNameForCurrentDisplayedDirectoryPath];
-	return [self createFileItemWithFileName:fileName atDirectoryPath:currentDisplayedDirectoryPath];
-}
-
 
 #pragma mark -
 #pragma mark Item Retrieval
@@ -116,59 +101,61 @@ BPItemManager *sharedInstance = nil;
 	return [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
 }
 
-- (NSArray*)rootItems {
-	NSString *rootDirectory = [self itemRootDirectory];
-	return [self itemsForDirectoryAtPath:rootDirectory];
+- (BPItem*)rootItem {
+	BPItem *item = [self folderItem];
+	item.storageType = BPItemPropertyStorageTypeRoot;
+	return item;
 }
 
 - (NSArray*)specialRootItems {
-	BPItem *localRoot = [self folderItemFromPath:[self itemRootDirectory]];
-	BPItem *dropboxRoot = [self folderItemFromPath:[self itemRootDirectory]];
+	BPItem *localRoot = [self folderItemFromPath:[self itemRootDirectory] storageType:BPItemPropertyStorageTypeLocalFileSystem];
+	localRoot.storageType = BPItemPropertyStorageTypeLocalFileSystem;
+
+	BPItem *dropboxRoot = [self folderItem];
+	dropboxRoot.name = @"Dropbox";
+	dropboxRoot.path = @"/";
+	dropboxRoot.storageType = BPItemPropertyStorageTypeDropbox;
+	
 	NSMutableArray *items = [NSMutableArray arrayWithObjects:localRoot, dropboxRoot, nil];
-	return [items autorelease];
+	return items;
 }
 
-- (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath filteredBySearchString:(NSString*)searchString {
-	NSMutableArray *items = [[NSMutableArray alloc] init];
-	NSError *err;
-	NSArray *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directoryAtPath error:&err];
-	for (NSString *fileName in contents) {
-		if (searchString == nil
-			|| [searchString isEqualToString:@""]
-			|| [fileName rangeOfString:searchString options:NSRegularExpressionSearch].length > 0) { // regex search
-			BPItem *item = [[[BPItem alloc] init] autorelease];
-			item.name = fileName;
-			item.path = [NSString stringWithFormat:@"%@/%@", directoryAtPath, fileName];
-			BOOL isDirectory;
-			[[NSFileManager defaultManager] fileExistsAtPath:item.path isDirectory:&isDirectory];
-			item.type = isDirectory ? BPItemPropertyTypeFolder : BPItemPropertyTypeFile;
-			[items addObject:item];			
-		}
+- (NSArray*)contentsOfDirectoryItem:(BPItem*)directoryItem filteredBySearchString:(NSString*)searchString {
+	
+	if ([currentDisplayedDirectoryItem.storageType isEqualToString:BPItemPropertyStorageTypeRoot]) {
+		return [self specialRootItems];
+	} else {
+		return [[self itemStoreForItem:directoryItem] contentsOfDirectoryItem:directoryItem filteredBySearchString:searchString];		
 	}
-	[items sortUsingSelector:@selector(compare:)];
-	return [items autorelease];	
+
 }
 
-- (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath {
-	return [self itemsForDirectoryAtPath:directoryAtPath filteredBySearchString:nil];
+- (NSArray*)contentsOfDirectoryItem:(BPItem*)directoryItem {
+	return [self contentsOfDirectoryItem:directoryItem filteredBySearchString:nil];
 }
 
 - (NSArray*)itemsForCurrentDisplayedDirectoryPath {
-	return [self itemsForDirectoryAtPath:currentDisplayedDirectoryPath];
+	return [self contentsOfDirectoryItem:currentDisplayedDirectoryItem];
 }
 
 - (NSArray*)itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:(NSString*)searchString {
-	return [self itemsForDirectoryAtPath:currentDisplayedDirectoryPath filteredBySearchString:searchString];
+	return [self contentsOfDirectoryItem:currentDisplayedDirectoryItem filteredBySearchString:searchString];
 }
 
-- (NSString*)pushDirectoryName:(NSString*)directoryName {
-	self.currentDisplayedDirectoryPath = [self.currentDisplayedDirectoryPath stringByAppendingPathComponent:directoryName];
-	return currentDisplayedDirectoryPath;
+- (BPItem*)pushDirectoryItem:(BPItem*)directoryItem {
+	
+	if ([currentDisplayedDirectoryItem.storageType isEqualToString:BPItemPropertyStorageTypeRoot]) {
+		self.currentDisplayedDirectoryItem = [[self specialRootItems] objectAtIndex:0];
+	} else {
+		self.currentDisplayedDirectoryItem = [self folderItemFromPath:[self.currentDisplayedDirectoryItem.path stringByAppendingPathComponent:directoryItem.name] storageType:directoryItem.storageType];
+	}
+	
+	return currentDisplayedDirectoryItem;
 }
 
-- (NSString*)popDirectoryName {
-	self.currentDisplayedDirectoryPath = [currentDisplayedDirectoryPath stringByDeletingLastPathComponent];
-	return currentDisplayedDirectoryPath;
+- (BPItem*)popDirectoryItem {
+	self.currentDisplayedDirectoryItem = [self folderItemFromPath:[self.currentDisplayedDirectoryItem.path stringByDeletingLastPathComponent] storageType:self.currentDisplayedDirectoryItem.storageType];
+	return currentDisplayedDirectoryItem;
 }
 
 - (NSString*)nextDefaultFileNameAtDirectoryPath:(NSString*)directoryPath {
@@ -186,7 +173,7 @@ BPItemManager *sharedInstance = nil;
 }
 
 - (NSString*)nextDefaultFileNameForCurrentDisplayedDirectoryPath {
-	return [self nextDefaultFileNameAtDirectoryPath:currentDisplayedDirectoryPath];
+	return [self nextDefaultFileNameAtDirectoryPath:currentDisplayedDirectoryItem.path];
 }
 
 - (NSString*)nextDefaultFolderNameAtDirectoryPath:(NSString*)directoryPath {
@@ -206,41 +193,42 @@ BPItemManager *sharedInstance = nil;
 }
 
 - (NSString*)nextDefaultFolderNameForCurrentDisplayedDirectoryPath {
-	return [self nextDefaultFolderNameAtDirectoryPath:currentDisplayedDirectoryPath];
+	return [self nextDefaultFolderNameAtDirectoryPath:currentDisplayedDirectoryItem.path];
 }
 
 #pragma mark -
 #pragma mark Item Manipulation
 
 - (BOOL)saveItem:(BPItem*)item withText:(NSString*)text error:(NSError**)err {
-	return [text writeToFile:item.path atomically:YES encoding:NSUTF8StringEncoding error:err];
+	return [[self itemStoreForItem:item] saveItem:item withText:text error:err];	
 }
 
-- (BPItem*)renameFileItemFromPath:(NSString*)fromPath toPath:(NSString*)toPath {
-	NSError *err;
-	[[NSFileManager defaultManager] moveItemAtPath:fromPath toPath:toPath error:&err];
-	return [self fileItemFromPath:toPath];
+- (BPItem*)moveItem:(BPItem*)item toPath:(NSString*)path error:(NSError**)err {
+	return [[self itemStoreForItem:item] moveItem:item toPath:path error:err];
 }
 
-- (BPItem*)moveItem:(BPItem*)item toPath:(NSString*)path {
-	NSError *err;
-	BOOL moved = [[NSFileManager defaultManager] moveItemAtPath:item.path toPath:path error:&err];
-	if (!moved) {
-		//TODO: add error logic
+- (BOOL)deleteItem:(BPItem*)item error:(NSError**)err {
+	return [[self itemStoreForItem:item] deleteItem:item error:err];
+}
+
+- (id)itemStoreForItem:(BPItem*)item {
+	if ([item.storageType isEqualToString:BPItemPropertyStorageTypeLocalFileSystem]) {
+		return [BPFileSystemItemStore sharedInstance];
+	} else if ([item.storageType isEqualToString:BPItemPropertyStorageTypeDropbox]) {
+		return [BPDropboxItemStore sharedInstance];
+	} else {
+		return nil;
 	}
-	
-	BPItem *newItem = nil;
-	if ([item.type isEqualToString:BPItemPropertyTypeFile]) {
-		newItem = [self fileItemFromPath:path];
-	} else if ([item.type isEqualToString:BPItemPropertyTypeFolder]) {
-		newItem = [self folderItemFromPath:path];
-	}
-	return newItem;
 }
 
-- (BOOL)deleteItem:(BPItem*)item {
-	NSError *err;
-	return [[NSFileManager defaultManager] removeItemAtPath:item.path error:&err];
+- (id)itemStoreForStorageType:(NSString*)storageType {
+	if ([storageType isEqualToString:BPItemPropertyStorageTypeLocalFileSystem]) {
+		return [BPFileSystemItemStore sharedInstance];
+	} else if ([storageType isEqualToString:BPItemPropertyStorageTypeDropbox]) {
+		return [BPDropboxItemStore sharedInstance];
+	} else {
+		return nil;
+	}
 }
 
 @end

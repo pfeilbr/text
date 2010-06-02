@@ -6,11 +6,15 @@
 	
 	"keys": [
 		{
-			"label": "{"
+			"label": "    {    "
 			"text": "{"
 		},
 		{
-			"label": "}"
+			"label": "    (    "
+			"text": "("
+		},		
+		{
+			"label": "    }    "
 			"text": "}"
 		}
 	]

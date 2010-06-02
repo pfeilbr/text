@@ -13,27 +13,27 @@
 #import "DBSession.h"
 
 @interface BPItemManager : NSObject {
-	NSString *currentDisplayedDirectoryPath;
+	BPItem *currentDisplayedDirectoryItem;
 }
 
-@property(nonatomic, copy) NSString *currentDisplayedDirectoryPath;
+@property(nonatomic, retain) BPItem *currentDisplayedDirectoryItem;
 
 + (BPItemManager*)sharedInstance;
+- (BPItem*)rootItem;
 - (NSArray*)specialRootItems;
-- (NSArray*)rootItems;
-- (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath;
+- (NSArray*)contentsOfDirectoryItem:(BPItem*)directoryItem;
 - (NSArray*)itemsForCurrentDisplayedDirectoryPath;
 
 - (BPItem*)fileItem;
 - (BPItem*)folderItem;
-- (BPItem*)fileItemFromPath:(NSString*)path;
-- (BPItem*)folderItemFromPath:(NSString*)path;
+- (BPItem*)fileItemFromPath:(NSString*)path storageType:(NSString*)storageType;
+- (BPItem*)folderItemFromPath:(NSString*)path storageType:(NSString*)storageType;
 
-- (NSArray*)itemsForDirectoryAtPath:(NSString*)directoryAtPath filteredBySearchString:(NSString*)searchString;
+- (NSArray*)contentsOfDirectoryItem:(BPItem*)directoryItem filteredBySearchString:(NSString*)searchString;
 - (NSArray*)itemsForCurrentDisplayedDirectoryPathFilteredBySearchString:(NSString*)searchString;
 
-- (NSString*)pushDirectoryName:(NSString*)directoryName;
-- (NSString*)popDirectoryName;
+- (BPItem*)pushDirectoryItem:(BPItem*)directoryItem;
+- (BPItem*)popDirectoryItem;
 
 - (NSString*)nextDefaultFileNameAtDirectoryPath:(NSString*)directoryPath;
 - (NSString*)nextDefaultFileNameForCurrentDisplayedDirectoryPath;
@@ -42,12 +42,11 @@
 - (NSString*)nextDefaultFolderNameForCurrentDisplayedDirectoryPath;
 
 // item manipulation
-- (BPItem*)createFileItemWithFileName:(NSString*)fileName atDirectoryPath:(NSString*)directoryPath;
+- (BPItem*)createFileItemWithFileName:(NSString*)fileName atDirectoryPath:(NSString*)directoryPath storageType:(NSString*)storageType error:(NSError**)err;
+- (BPItem*)createFolderItemWithFolderName:(NSString*)folderName atDirectoryPath:(NSString*)directoryPath  storageType:(NSString*)storageType error:(NSError**)err;
 - (BOOL)saveItem:(BPItem*)item withText:(NSString*)text error:(NSError**)err;
-- (BPItem*)renameFileItemFromPath:(NSString*)fromPath toPath:(NSString*)toPath;
-- (BPItem*)moveItem:(BPItem*)item toPath:(NSString*)path;
-- (BOOL)deleteItem:(BPItem*)item;
-- (BPItem*)createFolderItemWithFolderName:(NSString*)folderName atDirectoryPath:(NSString*)directoryPath;
-- (BPItem*)createDefaultFileItemAtCurrentDisplayedDirectoryPath;
+- (BPItem*)moveItem:(BPItem*)item toPath:(NSString*)path error:(NSError**)err;
+- (BOOL)deleteItem:(BPItem*)item error:(NSError**)err;
+
 
 @end
