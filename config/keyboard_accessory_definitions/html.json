@@ -8,12 +8,53 @@
 	
 	"keys": [
 		{
-			"label": "{"
+			"label": "(",
+			"text": "("
+		},			
+		{
+			"label": "[",
+			"text": "["
+		},		
+		{
+			"label": "{",
 			"text": "{"
+		},	
+		{
+			"label": "<",
+			"text": "<"
+		},	
+		{
+			"label": "/",
+			"text": "/"
+		},		
+		{
+			"label": ";",
+			"text": ";"
 		},
 		{
-			"label": "}"
+			"label": "'",
+			"text": "'"
+		},
+		{
+			"label": "\"",
+			"text": "\""
+		},						
+		
+		{
+			"label": ">",
+			"text": ">"
+		},		
+		{
+			"label": "}",
 			"text": "}"
-		}
+		},
+		{
+			"label": "]",
+			"text": "]"
+		},
+		{
+			"label": ")",
+			"text": ")"
+		}			
 	]
 }

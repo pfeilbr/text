@@ -7,22 +7,29 @@
  *
  */
 
-#define BPDropboxConsumerKey = @"0ccay36sixvrbmc";
-#define BPDropboxConsumerSecret = @"arg6tcbel4m08zr";
+#define BPDropboxConsumerKey @"0ccay36sixvrbmc"
+#define BPDropboxConsumerSecret @"arg6tcbel4m08zr"
+
+#define kBPItemStorageTypeRoot @"root"
+#define kBPItemStorageTypeFileSystem @"file"
+#define kBPItemStorageTypeDropbox @"dropbox"
 
 #define kKeyItem @"item"
 
 #define BPItemPropertyStorageType @"BPItemPropertyStorageType"
 #define BPItemPropertyType @"BPItemPropertyType"
+#define BPItemPropertyIconName @"BPItemPropertyIconName"
 #define BPItemPropertyName @"BPItemPropertyName"
 #define BPItemPropertyPath @"BPItemPropertyPath"
 
 #define BPItemPropertyModifyModeNew @"BPItemPropertyModifyModeNew"
 #define BPItemPropertyModifyModeRename @"BPItemPropertyModifyModeRename"
 
+/*
 #define BPItemPropertyStorageTypeRoot @"BPItemPropertyStorageTypeRoot"
 #define BPItemPropertyStorageTypeLocalFileSystem @"BPItemPropertyStorageTypeLocalFileSystem"
 #define BPItemPropertyStorageTypeDropbox @"BPItemPropertyStorageTypeDropbox"
+*/
 
 #define BPItemPropertyTypeFile @"BPItemPropertyTypeFile"
 #define BPItemPropertyTypeFolder @"BPItemPropertyTypeFolder"
@@ -33,11 +40,14 @@
 
 #define BPItemSelectedNotification @"BPItemSelectedNotification"
 #define BPSelectItemInItemListNotification @"BPSelectItemInItemListNotification"
+#define BPDeleteItemInItemListNotification @"BPDeleteItemInItemListNotification"
 #define BPAddNewFileNotification @"BPAddNewFileNotification"
 #define BPRenameFileNotification @"BPRenameFileNotification"
 #define BPAddNewFolderNotification @"BPAddNewFolderNotification"
 #define BPRenameFolderNotification @"BPRenameFolderNotification"
 #define BPItemDeletedNotification @"BPItemDeletedNotification"
+
+#define BPSettingsChangedNotification @"BPSettingsChangedNotification"
 
 #define BPItemActionEmailFile @"Email"
 #define BPItemActionCopyFileToClipboard @"Copy to Clipboard"
@@ -47,7 +57,9 @@
 #define BPItemActionNewFolder @"New Folder"
 #define BPItemActionRenameFolder @"Rename Folder"
 #define BPItemActionMoveFolder @"Move Folder"
+#define BPItemActionWebPreview @"Web Preview"
 #define BPItemActionCancel @"Cancel"
+
 
 #define BPAddNewFileTitle @"File Name"
 #define BPRenameFileTitle @"Rename File"
@@ -65,6 +77,9 @@
 
 #define kConfigBaseDirectoryName @"config"
 #define kConfigKeyboardAccessoryDefinitionsDirectoryName @"keyboard_accessory_definitions"
+
+#define kDropboxSmallIconsBaseDirectoryName @"dropbox-api-icons/16x16"
+#define kDropboxLargeIconsBaseDirectoryName @"dropbox-api-icons/48x48"
 
 
 //#define kItemTypeFile @"file"

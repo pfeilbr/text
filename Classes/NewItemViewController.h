@@ -10,7 +10,8 @@
 #import "BPItem.h"
 #import "BPItemManager.h"
 
-@interface NewItemViewController : UIViewController<UITextFieldDelegate> {
+@interface NewItemViewController : UIViewController<UITextFieldDelegate, BPItemManagerDelegate> {
+    BPItemManager* itemManager;
 	NSMutableDictionary *data;
 	NSString *mode;	
 	NSString *itemType;
@@ -24,6 +25,7 @@
 	BOOL inputValueIsValid;
 }
 
+@property(nonatomic, retain, setter = setItemManager:) BPItemManager* itemManager;
 @property(nonatomic, retain) NSMutableDictionary *data;
 @property(nonatomic, copy) NSString *mode;
 @property(nonatomic, copy) NSString *itemType;

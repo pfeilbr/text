@@ -10,6 +10,7 @@
 #import "RootViewController.h"
 #import "TextAppDelegate.h"
 #import <MobileCoreServices/UTCoreTypes.h>
+#import "BPMetadata.h"
 
 
 enum TextViewActions {
@@ -19,7 +20,7 @@ enum TextViewActions {
 
 
 @interface DetailViewController ()
-@property (nonatomic, retain) UIPopoverController *popoverController;
+
 - (void)editItemLabel;
 - (void)saveItemLabel;
 - (void)renameItem;
@@ -27,18 +28,46 @@ enum TextViewActions {
 - (void)inputAccessoryViewButtonClicked:(id)sender;
 - (NSDictionary*)inputAccessoryViewDefinitionForItem:(BPItem*)_item;
 
+- (UIImage*)imageIconForItem:(BPItem*)_item;
+- (void)showItemLoadingView;
+- (void)hideItemLoadingView;
+
+@property (nonatomic, retain) UIPopoverController *popoverController;
+@property (nonatomic, retain) BPItemManager* itemManager;
+@property (nonatomic, retain) NSDictionary* settingsMetadata;
 @property (nonatomic, retain) NSMutableDictionary *inputAccessoryViewCache;
+@property (nonatomic, retain) UIWebView* webView;
+@property (nonatomic, copy) NSString* tempFilePath;
+
 @end
 
 
 @implementation DetailViewController
 
 @synthesize toolbar, itemLabel, itemLabelTextField, itemLabelBarButtonItem, popoverController, detailDescriptionLabel, textView, inputAccessoryView, rootViewController, actionsButton, actionSheet, settingsButton, inputAccessoryViewCache;
-@synthesize item, inputAccessoryViewDefinition;
+@synthesize itemManager, item, inputAccessoryViewDefinition;
+@synthesize settingsMetadata;
+@synthesize contentWebViewController;
+@synthesize webView;
+@synthesize tempFilePath;
+@synthesize itemLoadingView;
+@synthesize itemLoadingBackgroundView;
+
+/*
+- (void)awakeFromNib {
+	self.settingsMetadata = [[BPMetadata sharedInstance] metadataForPropertyName:@"settings"];	
+}
+*/
 
 #pragma mark ActionSheet Delegate
 
 - (void)actionSheet:(UIActionSheet *)_actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+	
+	// return if user clicked off the sheet and didn't select a button
+	if (buttonIndex == -1) {
+		return;
+	}
+	
 	[self saveCurrentItem];
 	
 	NSString *buttonTitle = [_actionSheet buttonTitleAtIndex:buttonIndex];
@@ -63,8 +92,15 @@ enum TextViewActions {
 		NSString *body = [textView clipboardText];			
 		UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
 		[pasteboard setString:body];		
+	} else if ([buttonTitle isEqualToString:BPItemActionWebPreview]) {
+		NSString *body = [item contents];
+		if (contentWebViewController == nil) {
+			self.contentWebViewController = [[ContentWebViewController alloc] initWithNibName:@"ContentWebViewController" bundle:nil];
+			contentWebViewController.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+		}
+		[self.splitViewController presentModalViewController:contentWebViewController animated:YES];
+		[contentWebViewController.contentWebView loadHTMLString:body baseURL:nil];
 	}
-
 }
 
 #pragma mark -
@@ -90,6 +126,7 @@ enum TextViewActions {
 	itemLabel.text = @"";
 	textView.text = @"";
 	textView.hidden = YES;
+	self.view.backgroundColor = [UIColor grayColor];
 }
 
 #pragma mark -
@@ -108,6 +145,8 @@ enum TextViewActions {
 
 - (void)addNewFile:(NSNotification*)notification {	
 	NewItemViewController *nivc = [[NewItemViewController alloc] initWithNibName:@"NewItemViewController" bundle:nil];
+    BPItem* currentDirectoryItem = [[((NewItemViewController*)self.rootViewController) visibleViewController] currentDirectoryItem];
+    nivc.itemManager = [[BPItemManager alloc] initWithItem:currentDirectoryItem];
 	nivc.modalPresentationStyle = UIModalPresentationFormSheet;
 	nivc.mode = BPItemPropertyModifyModeNew;
 	nivc.itemType = BPItemPropertyTypeFile;
@@ -121,6 +160,7 @@ enum TextViewActions {
 	NSDictionary *dict = [notification object];
 	BPItem *_item = [dict valueForKey:kKeyItem];
 	NewItemViewController *nivc = [[NewItemViewController alloc] initWithNibName:@"NewItemViewController" bundle:nil];
+    nivc.itemManager = [[BPItemManager alloc] initWithItem:self.rootViewController.currentDirectoryItem];    
 	nivc.modalPresentationStyle = UIModalPresentationFormSheet;
 	nivc.mode = BPItemPropertyModifyModeRename;
 	nivc.itemType = BPItemPropertyTypeFile;
@@ -144,6 +184,7 @@ enum TextViewActions {
 	NSDictionary *dict = [_notification object];
 	BPItem *_item = [dict valueForKey:kKeyItem];
 	NewItemViewController *nivc = [[NewItemViewController alloc] initWithNibName:@"NewItemViewController" bundle:nil];
+    nivc.itemManager = [[BPItemManager alloc] initWithItem:self.rootViewController.currentDirectoryItem];    
 	nivc.modalPresentationStyle = UIModalPresentationFormSheet;
 	nivc.mode = BPItemPropertyModifyModeRename;
 	nivc.itemType = BPItemPropertyTypeFolder;
@@ -160,6 +201,8 @@ enum TextViewActions {
 - (void)addNewFolder:(NSNotification*)notification {
 	[self saveCurrentItem];
 	NewItemViewController *nivc = [[NewItemViewController alloc] initWithNibName:@"NewItemViewController" bundle:nil];
+    BPItem* currentDirectoryItem = [[((NewItemViewController*)self.rootViewController) visibleViewController] currentDirectoryItem];
+    nivc.itemManager = [[BPItemManager alloc] initWithItem:currentDirectoryItem];
 	nivc.modalPresentationStyle = UIModalPresentationFormSheet;
 	nivc.mode = BPItemPropertyModifyModeNew;	
 	nivc.itemType = BPItemPropertyTypeFolder;
@@ -169,26 +212,44 @@ enum TextViewActions {
 	[nivc release];
 }
 
+- (void)settingsChanged:(NSNotification*)notification {
+	[self applySettings];
+}
 
 #pragma mark Button Handlers
 
 - (IBAction)actionsButtonPressed:(id)sender {
-    if (self.actionSheet.visible) {
-        [self.actionSheet dismissWithClickedButtonIndex:-1 animated:NO];
-    }
-    
-    if (popoverController != nil) {
+	// hde settings popover if being displayed
+    if (popoverController != nil && popoverController.popoverVisible) {
         [popoverController dismissPopoverAnimated:YES];
     }
-    
-    [actionSheet showFromBarButtonItem:actionsButton animated:YES];
+
+	// toggle display of Action sheet
+    if (self.actionSheet.visible) {
+		[self.actionSheet dismissWithClickedButtonIndex:-1 animated:NO];
+    } else {
+		[actionSheet showFromBarButtonItem:actionsButton animated:YES];
+	}
 }
 
 - (IBAction)settingsButtonPressed:(id)sender {
-	SettingsTableViewController *stvc = [[SettingsTableViewController alloc] initWithNibName:@"SettingsTableViewController" bundle:nil];
-	self.popoverController = [[UIPopoverController alloc] initWithContentViewController:stvc];
-	[popoverController presentPopoverFromBarButtonItem:settingsButton permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-	[stvc release];
+	// hide action sheet if being displayed
+    if (self.actionSheet.visible) {
+        [self.actionSheet dismissWithClickedButtonIndex:-1 animated:NO];
+    }
+	
+	// toggle display of settings popover
+    if (popoverController != nil && popoverController.popoverVisible) {
+        [popoverController dismissPopoverAnimated:YES];
+    } else {
+		UINavigationController* nc = [[UINavigationController alloc] init];
+		SettingsTableViewController *stvc = [[SettingsTableViewController alloc] initWithNibName:@"SettingsTableViewController" bundle:nil];
+		[nc pushViewController:stvc animated:NO];
+		self.popoverController = [[UIPopoverController alloc] initWithContentViewController:nc];
+		[popoverController presentPopoverFromBarButtonItem:settingsButton permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+		[stvc release];
+		[nc release];
+	}
 }
 
 #pragma mark -
@@ -205,19 +266,169 @@ enum TextViewActions {
 
 - (void)setDetailItem:(BPItem*)_item {
 	self.item = _item;
+	self.itemManager = [[BPItemManager alloc] initWithItem:_item];
+	itemManager.delegate = self;
+	
+	itemLoadingView.imageView.image = [self imageIconForItem:_item];
+	itemLoadingView.label.text = item.name;
+	[self showItemLoadingView];
+	
+	[itemManager loadItem:_item];	
+}
+
+- (void)itemManager:(BPItemManager*)itemManager loadedItem:(BPItem*)_item data:(NSData*)data {
+    NSString* contents = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+
 	self.title = item.name;
 	itemLabel.text = item.name;
-	itemLabelTextField.text = item.name;
-	textView.text = [item contents];
-	textView.hidden = NO;
-	textView.inputAccessoryView = [self inputAccessoryViewForItem:_item];
-	self.inputAccessoryViewDefinition = [self inputAccessoryViewDefinitionForItem:_item];
+	itemLabelTextField.text = item.name;	
 	
-	if (popoverController != nil) {
-		[popoverController dismissPopoverAnimated:YES];
+	// editable text based file
+	if (contents != nil) {
+    	textView.text = contents;
+    	textView.hidden = NO;
+    	textView.inputAccessoryView = [self inputAccessoryViewForItem:_item];
+    	self.inputAccessoryViewDefinition = [self inputAccessoryViewDefinitionForItem:_item];	    
+    	
+        webView.hidden = YES;
+	} else { // not text based file - let webview render
+        textView.hidden = YES;
+	    
+		// delete the previous temp file
+		if (tempFilePath != nil) {
+			[[NSFileManager defaultManager] removeItemAtPath:tempFilePath error:nil];
+		}
+		
+    	self.tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:item.name];
+    	[data writeToFile:tempFilePath atomically:YES];
+    	[webView loadRequest:[NSURLRequest requestWithURL:[NSURL fileURLWithPath:tempFilePath]]];
+    	webView.hidden = NO;	    
 	}
 	
+	// hide action sheet if being displayed
+    if (self.actionSheet.visible) {
+        [self.actionSheet dismissWithClickedButtonIndex:-1 animated:NO];
+    }	
+	
+	// hide popover if being displayed
+	if (popoverController != nil && popoverController.popoverVisible) {
+		[popoverController dismissPopoverAnimated:YES];
+	}
+		
 	[[NSUserDefaults standardUserDefaults] setObject:[item dictionaryRepresentation] forKey:BPDefaultsLastItemDisplayed];
+	[self applySettings];
+	
+	[self hideItemLoadingView];
+}
+
+- (void)itemManager:(BPItemManager*)itemManager loadItem:(BPItem*)item failedWithError:(NSError*)error {
+	[self hideItemLoadingView];
+}
+
+- (void)itemManager:(BPItemManager *)itemManager createdFileItem:(BPItem *)item {
+    NSLog(@"itemManager:createdFileItem");
+}
+
+- (UIImage*)imageIconForItem:(BPItem*)_item {
+	UIImage* image = nil;
+	
+	if ([_item.iconName isEqualToString:@""]) {
+		UIDocumentInteractionController* dic = [UIDocumentInteractionController interactionControllerWithURL:[NSURL fileURLWithPath:_item.path]];
+		dic.name = item.name;
+		if (dic.icons != nil && ([dic.icons count] > 0)) {
+			image = [dic.icons objectAtIndex:0];
+		}		
+	} else {
+		NSString* iconImagePath = [[BPApp sharedInstance] getLargeIconImagePathForIconNamed:_item.iconName];
+		image = [UIImage imageWithContentsOfFile:iconImagePath];
+	}
+	return image;
+}
+
+- (void)showTextView {
+}
+
+- (void)hideTextView {
+}
+
+
+- (void)showWebView {
+}
+
+- (void)hideWebView {
+}
+
+- (void)showItemLoadingView {
+	itemLoadingBackgroundView.frame = textView.frame;
+	itemLoadingBackgroundView.center = textView.center;
+	
+	itemLoadingView.center = textView.center;
+	
+	[UIView beginAnimations:nil context:nil];
+	itemLoadingBackgroundView.hidden = NO;	
+	itemLoadingView.hidden = NO;
+	itemLoadingView.alpha = 1.0;
+	itemLoadingBackgroundView.alpha = 1.0;
+	[UIView commitAnimations];
+}
+
+- (void)hideItemLoadingView {
+	[UIView beginAnimations:nil context:nil];
+	itemLoadingView.hidden = YES;
+	itemLoadingBackgroundView.hidden = YES;
+	itemLoadingView.alpha = 0.0;
+	itemLoadingBackgroundView.alpha = 0.0;
+	[UIView commitAnimations];	
+}
+
+
+- (void)applySettings {
+
+	NSArray* sections = [settingsMetadata valueForKeyPath:@"sections"];
+	
+	for (NSDictionary* sectionMetadata in sections) {
+		NSArray* rows = [sectionMetadata valueForKeyPath:@"rows"];
+		for (NSDictionary* rowMetadata in rows) {
+			NSString* defaultsKeyName = [rowMetadata valueForKeyPath:@"defaultsKeyName"];
+			NSString* defaultsValue = [[NSUserDefaults standardUserDefaults] valueForKey:defaultsKeyName];
+			NSString* defaultValue = (defaultsValue != nil) ? defaultsValue : [rowMetadata valueForKeyPath:@"defaultValue"];
+			
+			if ([defaultsKeyName isEqualToString:@"fontName"]) {
+				textView.font = [UIFont fontWithName:defaultValue size:textView.font.pointSize];
+			}
+			
+			if ([defaultsKeyName isEqualToString:@"fontSize"]) {
+				
+				NSArray* fontSizeDefs = [BPApp sharedInstance].fontSizeDefinitions;
+				
+				for (NSDictionary* fontSizeDef in fontSizeDefs){
+					NSString* name = [fontSizeDef valueForKey:@"name"];
+					if ([name isEqualToString:defaultValue]) {
+						CGFloat fontSize = [[fontSizeDef valueForKey:@"value"] floatValue];
+						textView.font = [UIFont fontWithName:textView.font.fontName size:fontSize];						
+					}
+				}
+				
+			}
+			
+			if ([defaultsKeyName isEqualToString:@"textColor"]) {
+				SEL sel = NSSelectorFromString(defaultValue);
+				UIColor* color = objc_msgSend([UIColor class], sel);
+				textView.textColor = color;
+				NSLog(@"defaultsValue = %@", defaultValue);
+			}
+			
+			if ([defaultsKeyName isEqualToString:@"backgroundColor"]) {
+				SEL sel = NSSelectorFromString(defaultValue);
+				UIColor* color = objc_msgSend([UIColor class], sel);
+				textView.backgroundColor = color;
+				NSLog(@"defaultsValue = %@", defaultValue);
+			}
+			
+			
+		}
+	}
+	
 }
 
 - (UIView*)inputAccessoryViewForItem:(BPItem*)_item {
@@ -233,7 +444,7 @@ enum TextViewActions {
 	for (NSDictionary *keyDefinition in keyDefinitions) {
 		NSString *label = [keyDefinition valueForKey:@"label"];
 		//NSString *text = [keyDefinition valueForKey:@"text"];
-		UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:label style:UIBarButtonItemStyleBordered target:self action:@selector(inputAccessoryViewButtonClicked:)];
+		UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:[NSString stringWithFormat:@"    %@    ", label] style:UIBarButtonItemStyleBordered target:self action:@selector(inputAccessoryViewButtonClicked:)];
 		[buttons addObject:button];
 		[buttons addObject:flexibleSpace];
 	}
@@ -255,7 +466,7 @@ enum TextViewActions {
 	NSString *text = @"";
 	NSArray *keys = [inputAccessoryViewDefinition valueForKey:@"keys"];
 	for (NSDictionary *key in keys){
-		if ([label isEqualToString:[key valueForKey:@"label"]]) {
+		if ([label isEqualToString:[NSString stringWithFormat:@"    %@    ", [key valueForKey:@"label"]]]) {
 			text = [key valueForKey:@"text"];
 		}
 	}
@@ -292,11 +503,8 @@ enum TextViewActions {
 	if (item == nil) {
 		return;
 	}
-	NSError *err;
-	BOOL saved = [[BPItemManager sharedInstance] saveItem:self.item withText:textView.text error:&err];
-	if (!saved) {
-		;
-	}
+
+	[itemManager saveItem:self.item withText:textView.text];
 }
 
 /*
@@ -376,6 +584,35 @@ enum TextViewActions {
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
+	/*
+	NSMutableArray* toolbarItems = [NSMutableArray arrayWithObject:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRewind target:self action:@selector(toggleMasterView:)]];
+	[toolbarItems addObjectsFromArray:self.toolbar.items];
+	self.toolbar.items = toolbarItems;
+	*/
+
+	self.tempFilePath = nil;
+	
+	self.settingsMetadata = [[BPMetadata sharedInstance] metadataForPropertyName:@"settings"];	
+	
+	self.webView = [[UIWebView alloc] initWithFrame:textView.frame];
+	webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+	//webView.multipleTouchEnabled = YES;
+	webView.scalesPageToFit = YES;
+	[self.view addSubview:webView];	
+	webView.hidden = YES;
+	
+	self.itemLoadingBackgroundView = [[UIView alloc] init];
+	itemLoadingBackgroundView.backgroundColor = [UIColor whiteColor];
+	[self.view addSubview:itemLoadingBackgroundView];
+	itemLoadingBackgroundView.hidden = YES;
+	
+	[[NSBundle mainBundle] loadNibNamed:@"ItemLoadingView" owner:self options:nil];
+	itemLoadingView.center = textView.center;
+	[self.view addSubview:itemLoadingView];
+	itemLoadingView.hidden = YES;
+	
+	[self hideItemLoadingView];
+	
 	itemLabelBarButtonItem.customView.backgroundColor = [UIColor clearColor];
 	itemLabel.backgroundColor = [UIColor clearColor];
 	
@@ -389,14 +626,11 @@ enum TextViewActions {
 												 name:BPItemDeletedNotification
 											   object:nil];	
 	
-	
-	
-	
 	 self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
 															delegate:self
 												  cancelButtonTitle:nil
 											destructiveButtonTitle:nil
-												  otherButtonTitles:BPItemActionRenameFile, BPItemActionRenameFolder, BPItemActionEmailFile, BPItemActionCopyFileToClipboard, nil];
+												  otherButtonTitles:BPItemActionRenameFile, BPItemActionRenameFolder, BPItemActionEmailFile, BPItemActionCopyFileToClipboard, BPItemActionWebPreview, nil];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											       selector:@selector(orientationDidChange:)
@@ -459,6 +693,9 @@ enum TextViewActions {
 	[actionsButton release];
 	[actionSheet release];
 	[settingsButton release];
+	[settingsMetadata release];
+	[itemManager release];
+	[webView release];
     
 	[super dealloc];
 }	

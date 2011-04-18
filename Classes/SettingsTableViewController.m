@@ -8,12 +8,34 @@
 
 #import "SettingsTableViewController.h"
 
+@interface SettingsTableViewController()
+
+- (void)reload;
+
+@property(nonatomic, retain) NSDictionary* settingsMetadata;
+
+@end
+
+
+typedef enum {
+	kSettingsGroup_Color = 0,
+	kSettingsGroup_Font
+} SettingsGroup;
 
 @implementation SettingsTableViewController
 
+@synthesize settingsMetadata;
 
 #pragma mark -
 #pragma mark View lifecycle
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+	if ([super initWithNibName:nibNameOrNil bundle:nibBundleOrNil] != nil) {
+		self.title = @"Settings";
+		self.settingsMetadata = [[BPMetadata sharedInstance] metadataForPropertyName:@"settings"];
+	}
+	return self;
+}
 
 /*
 - (void)viewDidLoad {
@@ -32,11 +54,12 @@
     [super viewWillAppear:animated];
 }
 */
-/*
+
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+	[self reload];
 }
-*/
+
 /*
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
@@ -60,17 +83,20 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     // Return the number of sections.
-    return 2;
+    return [[settingsMetadata valueForKeyPath:@"sections"] count];
 }
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    // Return the number of rows in the section.
-    return 3;
+	NSArray* sections = [settingsMetadata valueForKeyPath:@"sections"];
+	NSDictionary* sectionMetadata = [sections objectAtIndex:section];
+	return [[sectionMetadata valueForKeyPath:@"rows"] count];
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-	return @"Header Title";
+	NSArray* sections = [settingsMetadata valueForKeyPath:@"sections"];
+	NSDictionary* sectionMetadata = [sections objectAtIndex:section];
+	return [sectionMetadata valueForKeyPath:@"name"];
 }
 
 // Customize the appearance of table view cells.
@@ -80,10 +106,18 @@
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier] autorelease];
     }
+
+	NSArray* sections = [settingsMetadata valueForKeyPath:@"sections"];
+	NSDictionary* sectionMetadata = [sections objectAtIndex:indexPath.section];
+	NSArray* rows = [sectionMetadata valueForKeyPath:@"rows"];
+	NSDictionary* rowMetadata = [rows objectAtIndex:indexPath.row];
     
-    // Configure the cell...
+    cell.textLabel.text = [rowMetadata valueForKeyPath:@"name"];
+	NSString* defaultsKeyName = [rowMetadata valueForKeyPath:@"defaultsKeyName"];
+	NSString* defaultsFontName = [[NSUserDefaults standardUserDefaults] valueForKey:defaultsKeyName];
+	cell.detailTextLabel.text = (defaultsFontName != nil) ? defaultsFontName : [rowMetadata valueForKeyPath:@"defaultValue"];
     
     return cell;
 }
@@ -141,8 +175,94 @@
 	 [self.navigationController pushViewController:detailViewController animated:YES];
 	 [detailViewController release];
 	 */
+
+	NSArray* sections = [settingsMetadata valueForKeyPath:@"sections"];
+	NSDictionary* sectionMetadata = [sections objectAtIndex:indexPath.section];
+	NSArray* rows = [sectionMetadata valueForKeyPath:@"rows"];
+	NSDictionary* rowMetadata = [rows objectAtIndex:indexPath.row];	
+	NSString* name = [rowMetadata valueForKeyPath:@"name"];
+	
+	if ([name isEqualToString:@"Link to Dropbox"]) {
+		if (![[DBSession sharedSession] isLinked]) {
+			DBLoginController* controller = [[DBLoginController new] autorelease];
+			controller.delegate = self;
+			[controller presentFromController:self.navigationController];
+		} else {
+			[[DBSession sharedSession] unlink];			
+			[[NSUserDefaults standardUserDefaults] setValue:@"Link" forKey:@"dropboxLink"];
+
+			[[[[UIAlertView alloc] 
+			   initWithTitle:@"Account Unlinked!" message:@"Your dropbox account has been unlinked" 
+			   delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]
+			  autorelease]
+			 show];
+			
+			[self reload];
+		}			
+	} else if ([name isEqualToString:@"Text"]) {
+		ColorPickerViewController* cpvc = [[ColorPickerViewController alloc] init];
+		cpvc.title = @"Text Color";
+		cpvc.onPickCompleteBlock = ^(NSDictionary* colorDefinition) {
+			NSString* colorName = [colorDefinition valueForKeyPath:@"name"];
+			[[NSUserDefaults standardUserDefaults] setValue:colorName forKey:@"textColor"];
+			[[NSNotificationCenter defaultCenter] postNotificationName:BPSettingsChangedNotification object:nil];
+		};
+		[self.navigationController pushViewController:cpvc animated:YES];
+		[cpvc release];
+	} else if ([name isEqualToString:@"Background"]) {
+		ColorPickerViewController* cpvc = [[ColorPickerViewController alloc] init];
+		cpvc.onPickCompleteBlock = ^(NSDictionary* colorDefinition) {
+			NSString* colorName = [colorDefinition valueForKeyPath:@"name"];
+			[[NSUserDefaults standardUserDefaults] setValue:colorName forKey:@"backgroundColor"];
+			[[NSNotificationCenter defaultCenter] postNotificationName:BPSettingsChangedNotification object:nil];
+		};		
+		cpvc.title = @"Background Color";
+		[self.navigationController pushViewController:cpvc animated:YES];
+		[cpvc release];		
+	} else if ([name isEqualToString:@"Font"]) {
+		ARFontPickerViewController* fpvc = [[ARFontPickerViewController alloc] init];
+		fpvc.delegate = self;
+		fpvc.title = @"Font";
+		[self.navigationController pushViewController:fpvc animated:YES];
+		[fpvc release];		
+	} else if ([name isEqualToString:@"Size"]) {
+		GenericPickerViewController* gpvc = [[GenericPickerViewController alloc] init];
+		gpvc.items = [BPApp sharedInstance].fontSizeDefinitions;
+		gpvc.onPickCompleteBlock = ^(NSDictionary* item) {
+			NSString* fontSizeName = [item valueForKeyPath:@"name"];
+			NSString* fontSizeString = [item valueForKeyPath:@"value"];
+			[[NSUserDefaults standardUserDefaults] setValue:fontSizeName forKey:@"fontSize"];
+			[[NSNotificationCenter defaultCenter] postNotificationName:BPSettingsChangedNotification object:nil];
+		};
+		gpvc.title = @"Font Size";
+		[self.navigationController pushViewController:gpvc animated:YES];
+		[gpvc release];		
+	}
+	
 }
 
+#pragma mark DBLoginControllerDelegate methods
+
+- (void)loginControllerDidLogin:(DBLoginController*)controller {
+	[[NSUserDefaults standardUserDefaults] setValue:@"Unlink" forKey:@"dropboxLink"];
+    [self reload];
+}
+
+- (void)loginControllerDidCancel:(DBLoginController*)controller {
+	
+}
+
+- (void)fontPickerViewController:(ARFontPickerViewController *)fontPicker didSelectFont:(NSString *)fontName {
+	NSLog(@"fontName = %@", fontName);
+	[[NSUserDefaults standardUserDefaults] setValue:fontName forKey:@"fontName"];
+	[self.navigationController popViewControllerAnimated:YES];
+	[self reload];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BPSettingsChangedNotification object:nil];					
+}
+
+- (void)reload {
+	[self.tableView reloadData];
+}
 
 #pragma mark -
 #pragma mark Memory management
@@ -161,6 +281,7 @@
 
 
 - (void)dealloc {
+	[settingsMetadata release];
     [super dealloc];
 }
 

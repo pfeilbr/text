@@ -32,7 +32,7 @@ BPFileSystemItemStore *BPFileSystemItemStoreSharedInstance = nil;
 	BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
 	if (fileExists) {
 		item = [self fileItem];
-		item.storageType = BPItemPropertyStorageTypeLocalFileSystem;
+		item.storageType = kBPItemStorageTypeFileSystem;
 		item.name = [path lastPathComponent];
 		item.path = path;
 	}
@@ -44,7 +44,7 @@ BPFileSystemItemStore *BPFileSystemItemStoreSharedInstance = nil;
 	BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
 	if (fileExists) {
 		item = [self folderItem];
-		item.storageType = BPItemPropertyStorageTypeLocalFileSystem;
+		item.storageType = kBPItemStorageTypeFileSystem;
 		item.name = [path lastPathComponent];
 		item.path = path;
 	}

@@ -23,7 +23,8 @@
     SEL downloadProgressSelector;
     SEL uploadProgressSelector;
     NSString* resultFilename;
-    NSObject* userInfo;
+    NSString* tempFilename;
+    NSDictionary* userInfo;
 
     NSHTTPURLResponse* response;
     NSInteger bytesDownloaded;
@@ -47,7 +48,7 @@
 @property (nonatomic, assign) SEL downloadProgressSelector; // To receive download progress events set this
 @property (nonatomic, assign) SEL uploadProgressSelector; // To receive upload progress events set this
 @property (nonatomic, retain) NSString* resultFilename; // The file to put the HTTP body in, otherwise body is stored in resultData
-@property (nonatomic, retain) NSObject* userInfo;
+@property (nonatomic, retain) NSDictionary* userInfo;
 
 @property (nonatomic, readonly) NSURLRequest* request;
 @property (nonatomic, readonly) NSHTTPURLResponse* response;

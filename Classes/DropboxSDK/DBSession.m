@@ -73,6 +73,7 @@ static NSString* kDBDropboxSavedCredentialsKey = @"kDBDropboxSavedCredentialsKey
 }
 
 @synthesize credentialStore;
+@synthesize delegate;
 
 - (void)updateAccessToken:(NSString*)token accessTokenSecret:(NSString*)secret {
     credentialStore.accessToken = token;
@@ -106,6 +107,7 @@ static NSString* kDBDropboxSavedCredentialsKey = @"kDBDropboxSavedCredentialsKey
     
     [[NSUserDefaults standardUserDefaults] 
             setObject:credentials forKey:kDBDropboxSavedCredentialsKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)clearSavedCredentials {

@@ -11,16 +11,26 @@
 #import "DBRequest.h"
 #import "DBRestClient.h"
 #import "DBSession.h"
+#import "BPBaseStorageClient.h"
 
-@interface BPItemManager : NSObject {
-	BPItem *currentDisplayedDirectoryItem;
+@protocol BPItemManagerDelegate;
+
+@interface BPItemManager : NSObject<BPStorageClientDelegate> {
+	id<BPItemManagerDelegate> delegate;
+	id<BPStorageClient> storageClient;
+	BPItem* rootItem;
+	BPItem* currentDisplayedDirectoryItem;
+	BPItem* workingItem;
 }
 
-@property(nonatomic, retain) BPItem *currentDisplayedDirectoryItem;
+@property (nonatomic, assign) id<BPItemManagerDelegate> delegate;
+@property (nonatomic, retain) BPItem *currentDisplayedDirectoryItem;
+
++ (void)setCurrentDisplayedDirectoryItem:(BPItem*)item;
++ (BPItem*)getCurrentDisplayedDirectoryItem;
 
 + (BPItemManager*)sharedInstance;
 - (BPItem*)rootItem;
-- (NSArray*)specialRootItems;
 - (NSArray*)contentsOfDirectoryItem:(BPItem*)directoryItem;
 - (NSArray*)itemsForCurrentDisplayedDirectoryPath;
 
@@ -41,12 +51,44 @@
 - (NSString*)nextDefaultFolderNameAtDirectoryPath:(NSString*)directoryPath;
 - (NSString*)nextDefaultFolderNameForCurrentDisplayedDirectoryPath;
 
+- (id)initWithItem:(BPItem*)item;
+
+- (void)loadDirectoryItemContents:(BPItem*)directoryItem;
+- (void)loadItem:(BPItem*)item;
+
 // item manipulation
-- (BPItem*)createFileItemWithFileName:(NSString*)fileName atDirectoryPath:(NSString*)directoryPath storageType:(NSString*)storageType error:(NSError**)err;
-- (BPItem*)createFolderItemWithFolderName:(NSString*)folderName atDirectoryPath:(NSString*)directoryPath  storageType:(NSString*)storageType error:(NSError**)err;
-- (BOOL)saveItem:(BPItem*)item withText:(NSString*)text error:(NSError**)err;
+- (void)createFileItemWithFileName:(NSString*)fileName atDirectoryPath:(NSString*)directoryPath storageType:(NSString*)storageType;
+- (void)createFolderItemWithFolderName:(NSString*)folderName atDirectoryPath:(NSString*)directoryPath  storageType:(NSString*)storageType;
+- (void)saveItem:(BPItem*)item withText:(NSString*)text;
 - (BPItem*)moveItem:(BPItem*)item toPath:(NSString*)path error:(NSError**)err;
-- (BOOL)deleteItem:(BPItem*)item error:(NSError**)err;
+- (void)deleteItem:(BPItem*)item;
 
 
 @end
+
+@protocol BPItemManagerDelegate <NSObject>
+@optional
+- (void)itemManager:(BPItemManager*)itemManager loadedDirectoryItem:(BPItem*)directoryItem contents:(NSArray*)items;
+- (void)itemManager:(BPItemManager*)itemManager loadDirectoryItemContentsFailedWithError:(NSError*)error;
+
+- (void)itemManager:(BPItemManager*)itemManager loadedItem:(BPItem*)item data:(NSData*)data;
+- (void)itemManager:(BPItemManager*)itemManager loadItemFailedWithError:(NSError*)error;
+
+- (void)itemManager:(BPItemManager*)itemManager createdFileItem:(BPItem*)item;
+- (void)itemManager:(BPItemManager*)itemManager createFileItemFailedWithError:(NSError*)error;
+
+- (void)itemManager:(BPItemManager*)itemManager createdFolderItem:(BPItem*)item;
+- (void)itemManager:(BPItemManager*)itemManager createFolderItemFailedWithError:(NSError*)error;
+
+- (void)itemManager:(BPItemManager*)itemManager savedItem:(BPItem*)item;
+- (void)itemManager:(BPItemManager*)itemManager saveItem:(BPItem*)item failedWithError:(NSError*)error;
+
+- (void)itemManager:(BPItemManager*)itemManager movedItem:(BPItem*)item;
+- (void)itemManager:(BPItemManager*)itemManager moveItem:(BPItem*)item failedWithError:(NSError*)error;
+
+- (void)itemManager:(BPItemManager*)itemManager deletedItem:(BPItem*)item;
+- (void)itemManager:(BPItemManager*)itemManager deleteItem:(BPItem*)item failedWithError:(NSError*)error;
+
+
+@end
+

@@ -68,6 +68,16 @@
 											 selector:@selector(selectItemInList:)
 												 name:BPSelectItemInItemListNotification
 											   object:nil];
+
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(settingsChanged:)
+												 name:BPSettingsChangedNotification
+											   object:nil];
+	
+//	[[NSNotificationCenter defaultCenter] addObserver:self
+//											 selector:@selector(deleteItemInList:)
+//												 name:BPDeleteItemInItemListNotification
+//											   object:nil];
 	
 	ItemTableViewController *itvc = [[ItemTableViewController alloc] initWithNibName:@"ItemTableViewController" bundle:nil];
 	itvc.isRootDirectory = YES;
@@ -79,7 +89,7 @@
 }
 
 - (void)displayItem:(NSNotification*)notification {
-	NSDictionary *dict = [[notification object] copy];
+	NSDictionary *dict = [[[notification object] copy] autorelease];
 	BPItem *item = [dict valueForKey:kKeyItem];
 	[detailViewController setDetailItem:item];
 }
@@ -107,8 +117,22 @@
 	BPItem *item = [dict valueForKey:kKeyItem];
 	
 	ItemTableViewController *itvc = (ItemTableViewController*)super.navigationController.topViewController;
-	[itvc selectItem:item];
+	itvc.currentSelectedItem = item;
+	[itvc loadItems];
 }
+
+- (void)settingsChanged:(NSNotification*)notification {
+	[detailViewController settingsChanged:notification];
+}
+
+//- (void)deleteItemInList:(NSNotification*)notification {
+//	NSDictionary *dict = [[notification object] copy];
+//	BPItem *item = [dict valueForKey:kKeyItem];
+//	
+//	ItemTableViewController *itvc = (ItemTableViewController*)super.navigationController.topViewController;
+//	[itvc selectItem:item];
+//}
+
 
 /*
 - (void)viewWillAppear:(BOOL)animated {

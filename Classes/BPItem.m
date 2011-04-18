@@ -10,13 +10,14 @@
 
 @implementation BPItem
 
-@synthesize storageType, type, name, path;
+@synthesize storageType, type, iconName, name, path;
 
 - (id)init {
 	if (self = [super init]) {
 		// zero everything out
 		storageType = @"";
 		type = @"";
+		iconName = @"";
 		name = @"";
 		path = @"";
 	}
@@ -26,6 +27,7 @@
 - (void)dealloc {
 	[storageType release];
 	[type release];
+	[iconName release];
 	[name release];
 	[path release];
 	[super dealloc];
@@ -66,6 +68,7 @@
 	BPItem *item = [[BPItem alloc] init];
 	item.storageType = [dictionaryRepresentation valueForKey:BPItemPropertyStorageType];
 	item.type = [dictionaryRepresentation valueForKey:BPItemPropertyType];
+	item.iconName = [dictionaryRepresentation valueForKey:BPItemPropertyIconName];
 	item.name = [dictionaryRepresentation valueForKey:BPItemPropertyName];
 	item.path = [dictionaryRepresentation valueForKey:BPItemPropertyPath];
 	return [item autorelease];
@@ -75,9 +78,14 @@
 	NSMutableDictionary *dict = [NSMutableDictionary dictionary];
 	[dict setValue:storageType forKey:BPItemPropertyStorageType];
 	[dict setValue:type forKey:BPItemPropertyType];
+	[dict setValue:iconName forKey:BPItemPropertyIconName];	
 	[dict setValue:name forKey:BPItemPropertyName];
 	[dict setValue:path forKey:BPItemPropertyPath];
 	return dict;
+}
+
+- (NSString*)description {
+	return [[self dictionaryRepresentation] description];
 }
 
 @end

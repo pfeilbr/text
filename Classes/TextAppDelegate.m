@@ -11,8 +11,12 @@
 
 #import "RootViewController.h"
 #import "DetailViewController.h"
+#import "DropboxSDK.h"
 #import "BPConfig.h"
-
+#import "BPDropboxStorageClient.h"
+#import "BPFileSystemStorageClient.h"
+#import "ContentWebViewController.h"
+#import "BPMetadata.h"
 
 @interface TextAppDelegate (CoreDataPrivate)
 @property (nonatomic, retain, readonly) NSManagedObjectModel *managedObjectModel;
@@ -26,19 +30,116 @@
 
 @synthesize window, splitViewController, rootViewController, detailViewController;
 
+- (void)storageClient:(id<BPStorageClient>)storageClient loadedMetadata:(NSDictionary*)metadata {
+	NSLog(@"%s", __FUNCTION__);
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient loadMetadataFailedWithError:(NSError*)error {
+	NSLog(@"%s", __FUNCTION__);	
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient createdFile:(NSString*)path {
+	NSLog(@"%s", __FUNCTION__);	
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient createFileFailedWithError:(NSError*)error {
+	NSLog(@"%s", __FUNCTION__);	
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient createdFolder:(NSString*)folder {
+	NSLog(@"%s", __FUNCTION__);	
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient createFolderFailedWithError:(NSError*)error {
+	NSLog(@"%s", __FUNCTION__);	
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient loadedFile:(NSString*)path data:(NSData*)data {
+	NSLog(@"%s", __FUNCTION__);
+	NSString* s = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+	NSLog(@"%@",s);
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient loadFileFailedWithError:(NSError*)error {
+	NSLog(@"%s", __FUNCTION__);	
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient deletedPath:(NSString*)path {
+	NSLog(@"%s", __FUNCTION__);		
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient deletePathFailedWithError:(NSError*)error {
+	NSLog(@"%s", __FUNCTION__);
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient copiedPath:(NSString*)fromPath toPath:(NSString*)toPath {
+	NSLog(@"%s", __FUNCTION__);
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient copyPathFailedWithError:(NSError*)error {
+	NSLog(@"%s", __FUNCTION__);
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient movedPath:(NSString*)fromPath toPath:(NSString*)toPath {
+	NSLog(@"%s", __FUNCTION__);
+}
+
+- (void)storageClient:(id<BPStorageClient>)storageClient movePathFailedWithError:(NSError*)error {
+	NSLog(@"%s", __FUNCTION__);
+}
+
 
 - (void)test {
+	
+	//NSRegularExpression* regex = [[NSRegularExpression regularExpressionWithPattern:<#(NSString *)pattern#> options:<#(NSRegularExpressionOptions)options#> error:<#(NSError **)error#>
+	
+	
+	BPFileSystemStorageClient* dsc = [[BPFileSystemStorageClient alloc] init];
+	NSString* protocol = dsc.storageType;
+	
+	//NSDictionary* metadata = [[BPMetadata sharedInstance] metadata];
+	//NSDictionary* settings = [[BPMetadata sharedInstance] metadataForPropertyName:@"settings"];
 	NSDictionary *def = [[BPConfig sharedInstance] keyboardAccessoryDefinitionForType:@"html"];
 	NSLog(@"%@", def);
+	
+	NSString* docsDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+	
+	
+	BPFileSystemStorageClient* fsClient = [[BPFileSystemStorageClient alloc] init];
+	fsClient.delegate = self;
+	[fsClient createFolder:[docsDir stringByAppendingPathComponent:@"mydocs"]];
+	
+	
+	NSString* fromPath = [docsDir stringByAppendingPathComponent:@"file1.txt"];
+	NSString* path = [docsDir stringByAppendingPathComponent:@"newfile1.txt"];
+	[fsClient createFile:path fromPath:fromPath];
+	
+	[fsClient loadFile:@"junk"];
+	
+	BPDropboxStorageClient* client = [[BPDropboxStorageClient alloc] init];
+	client.delegate = self;
+	//[client createFolder:@"/atest01/subfolder01"];
+	[client createFile:@"/atest01/subfolder01/a.txt" fromPath:[docsDir stringByAppendingPathComponent:@"file1.txt"]];
+	//[client loadFile:@"/notes/Jamaica.txt"];
+	//[client deletePath:@"/atest01/subfolder01/a.txt"];
 }
+
 
 #pragma mark -
 #pragma mark Application lifecycle
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 	
+	
+    DBSession* dbSession =
+		[[[DBSession alloc]
+		  initWithConsumerKey:BPDropboxConsumerKey
+		  consumerSecret:BPDropboxConsumerSecret
+		 ] autorelease];
+    [DBSession setSharedSession:dbSession];
+
 	// TODO: delete test
-	[self test];
+	//[self test];	
 	
 	rootViewController.currentDirectoryItem = [BPItemManager sharedInstance].currentDisplayedDirectoryItem;
     
@@ -48,9 +149,69 @@
     
 	// Add the split view controller's view to the window and display.
 	[window addSubview:splitViewController.view];
+    
+
+    
+	//[self performSelector:@selector(webView:) withObject:self afterDelay:1.0];
     [window makeKeyAndVisible];
 	
+	[self performSelector:@selector(showFullScreen:) withObject:self afterDelay:2.0];
+	
 	return YES;
+}
+
+- (void)showFullScreen:(id)target {
+    UIViewController *vc0 = (UIViewController*)[splitViewController.viewControllers objectAtIndex:0];
+    UIViewController *vc1 = (UIViewController*)[splitViewController.viewControllers objectAtIndex:1];
+    
+    [UIView beginAnimations:nil context:nil];
+    [splitViewController.view removeFromSuperview];
+    tmpView = vc1.view.superview;
+    [vc1.view removeFromSuperview];
+    [window addSubview:vc1.view];
+    [UIView commitAnimations];
+    
+    [self performSelector:@selector(showSplitScreen:) withObject:self afterDelay:2.0];
+}
+
+- (void)showSplitScreen:(id)target {
+    UIViewController *vc0 = (UIViewController*)[splitViewController.viewControllers objectAtIndex:0];
+    UIViewController *vc1 = (UIViewController*)[splitViewController.viewControllers objectAtIndex:1];
+    
+    //[UIView beginAnimations:nil context:nil];
+    [vc1.view removeFromSuperview];
+    [tmpView addSubview:vc1.view];
+    CGAffineTransform rotate = CGAffineTransformMakeRotation(0.0);
+    vc1.view.transform = rotate;
+    [window addSubview:splitViewController.view];
+    //[UIView commitAnimations];
+    
+    [self performSelector:@selector(showFullScreen:) withObject:self afterDelay:2.0];
+}
+
+
+- (void)webView:(id)sender {
+	UINavigationController* nc = [[UINavigationController alloc] init];
+	
+	ContentWebViewController* vc = [[ContentWebViewController alloc] initWithNibName:@"ContentWebViewController" bundle:nil];
+	vc.title = @"Web View";
+	vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:nil action:nil];
+	
+	[nc pushViewController:vc animated:NO];
+	
+//	UIView* v = [[UIView alloc] init];
+//	v.backgroundColor = [UIColor greenColor];
+//	vc.view = v;
+	
+	UIToolbar* tb = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0, 0.0, 768.0, 40.0)];
+	UIBarButtonItem* button = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:nil action:nil];
+	tb.items = [NSArray arrayWithObject:button];
+	//[v addSubview:tb];
+	
+	[splitViewController presentModalViewController:nc animated:YES];
+	[vc retain];
+	
+	[vc.contentWebView loadHTMLString:@"<html><body>hello world</body></html>" baseURL:nil];
 }
 
 

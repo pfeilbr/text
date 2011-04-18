@@ -10,7 +10,6 @@
 #import "BPItem.h"
 
 @interface BPBaseItemStore : NSObject {
-
 }
 
 - (BPItem*)fileItem;

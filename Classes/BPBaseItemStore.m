@@ -8,6 +8,9 @@
 
 #import "BPBaseItemStore.h"
 
+@interface BPBaseItemStore ()
+@end
+
 
 @implementation BPBaseItemStore
 

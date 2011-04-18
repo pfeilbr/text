@@ -10,16 +10,31 @@
 
 @interface NewItemViewController()
 - (void)selectInputValueTextFieldText:(id)sender;
+- (void)dismissAndSelectItemInItemList:(BPItem*)item;
+- (void)selectItemInItemList:(BPItem*)item;
 @end
 
 
 
 @implementation NewItemViewController
 
-@synthesize data, mode, okBarButtonItem, cancelBarButtonItem, itemType, titleLabel, messageLabel, titleText, inputValueTextField, inputValueText;
+@synthesize itemManager, data, mode, okBarButtonItem, cancelBarButtonItem, itemType, titleLabel, messageLabel, titleText, inputValueTextField, inputValueText;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+
+    }
+    return self;
+}
 
 - (NSString*)getInputValue {
 	return inputValueTextField.text;
+}
+
+- (void)setItemManager:(BPItemManager *)_itemManager {
+    itemManager = _itemManager;
+    itemManager.delegate = self;
 }
 
 #pragma mark -
@@ -40,11 +55,12 @@
 	NSError *err;	
 	
 	if ([mode isEqualToString:BPItemPropertyModifyModeNew]) {
-
 		if ([itemType isEqualToString:BPItemPropertyTypeFile]) {
-			item = [[BPItemManager sharedInstance] createFileItemWithFileName:itemName atDirectoryPath:currentDisplayedDirectoryPath storageType:currentDisplayedDirectoryItem.storageType error:&err];		
+			[itemManager createFileItemWithFileName:itemName atDirectoryPath:currentDisplayedDirectoryPath storageType:currentDisplayedDirectoryItem.storageType];
+            return;
 		} else if ([itemType isEqualToString:BPItemPropertyTypeFolder]) {
-			item = [[BPItemManager sharedInstance] createFolderItemWithFolderName:itemName atDirectoryPath:currentDisplayedDirectoryPath storageType:currentDisplayedDirectoryItem.storageType error:&err];
+			[itemManager createFolderItemWithFolderName:itemName atDirectoryPath:currentDisplayedDirectoryPath storageType:currentDisplayedDirectoryItem.storageType];
+            return;
 		}		
 	} else if ([mode isEqualToString:BPItemPropertyModifyModeRename]) {
 		BPItem *_item = [data valueForKey:kKeyItem];
@@ -127,6 +143,43 @@
 	}
 
 	return NO;
+}
+
+- (void)dismissAndSelectItemInItemList:(BPItem*)item {
+	[self dismissModalViewControllerAnimated:YES];
+    [self selectItemInItemList:item];
+}
+
+- (void)selectItemInItemList:(BPItem*)item {
+	// select item
+	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObject:item forKey:kKeyItem];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BPSelectItemInItemListNotification object:dict];    
+}
+
+# pragma mark -
+#pragma mark BPItemManagerDelegate
+- (void)itemManager:(BPItemManager*)itemManager createdFileItem:(BPItem*)item {
+    [self dismissAndSelectItemInItemList:item];
+}
+
+- (void)itemManager:(BPItemManager*)itemManager createFileItemFailedWithError:(NSError*)error {
+    //[self dismissAndSelectItemInItemList:item];
+}
+
+- (void)itemManager:(BPItemManager*)itemManager createdFolderItem:(BPItem*)item {
+    [self dismissAndSelectItemInItemList:item];
+}
+
+- (void)itemManager:(BPItemManager*)itemManager createFolderItemFailedWithError:(NSError*)error {
+    //[self dismissAndSelectItemInItemList:item];
+}
+
+- (void)itemManager:(BPItemManager*)itemManager movedItem:(BPItem*)item {
+    [self dismissAndSelectItemInItemList:item];    
+}
+
+- (void)itemManager:(BPItemManager*)itemManager moveItem:(BPItem*)item failedWithError:(NSError*)error {
+    [self dismissAndSelectItemInItemList:item];
 }
 
 

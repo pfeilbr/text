@@ -7,10 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BPMetadata.h"
+#import "GenericPickerViewController.h"
+#import "ColorPickerViewController.h"
+#import "ARFontPickerViewController.h"
+#import "DropboxSDK.h"
 
 
-@interface SettingsTableViewController : UITableViewController {
-
+@interface SettingsTableViewController : UITableViewController<ARFontPickerViewControllerDelegate, DBLoginControllerDelegate> {
+	NSDictionary* settingsMetadata;
 }
+
 
 @end

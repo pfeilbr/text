@@ -13,4 +13,6 @@
     #import <UIKit/UIKit.h>
 	#import "JSON.h"
 	#import "Constants.h"
+	#import <objc/runtime.h>
+	#import "BPApp.h"
 #endif

@@ -9,12 +9,13 @@
 #import <UIKit/UIKit.h>
 #import <CoreData/CoreData.h>
 #import "BPItemManager.h"
-
+#import "BPBaseStorageClient.h"
+#import "MGSplitViewController.h"
 
 @class RootViewController;
 @class DetailViewController;
 
-@interface TextAppDelegate : NSObject <UIApplicationDelegate> {
+@interface TextAppDelegate : NSObject <UIApplicationDelegate, BPStorageClientDelegate, BPStorageClientDelegate> {
     
     NSManagedObjectModel *managedObjectModel;
     NSManagedObjectContext *managedObjectContext;	    
@@ -26,6 +27,8 @@
 
 	RootViewController *rootViewController;
 	DetailViewController *detailViewController;
+    
+    UIView *tmpView;
 }
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;

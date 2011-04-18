@@ -10,16 +10,18 @@
 
 
 @interface BPItem : NSObject {
-	NSString *storageType;
-	NSString *type;
-	NSString *name;
-	NSString *path;
+	NSString* storageType;
+	NSString* type;
+	NSString* iconName;
+	NSString* name;
+	NSString* path;
 }
 
-@property(nonatomic, copy) NSString *storageType;
-@property(nonatomic, copy) NSString *type;
-@property(nonatomic, copy) NSString *name;
-@property(nonatomic, copy) NSString *path;
+@property(nonatomic, copy) NSString* storageType;
+@property(nonatomic, copy) NSString* type;
+@property(nonatomic, copy) NSString* iconName;
+@property(nonatomic, copy) NSString* name;
+@property(nonatomic, copy) NSString* path;
 
 - (NSString*)directoryPath;
 - (NSString*)contents;

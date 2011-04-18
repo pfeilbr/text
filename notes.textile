@@ -1,7 +1,8 @@
 h1. TODOs
 
+* change in settings calls [DetailView applySettings].  Use NSNotificationCenter
+* add icons/images to items displayed as cells.  Use UIDocumentInteractionController to get icons based on extension.  look at icons used in dropbox
 * add informational row to bottom of item list that says something like "12 folders & 29 files" just like in Dropbox for iPad
-* add icons/images to items displayed as cells.  look at icons used in dropbox
 
 h1. Features
 
@@ -38,6 +39,7 @@ h2. Text Actions
 
 * -Send to Clipboard-
 * -Email text-
+** email text in body or as attachment
 * Email as HTML
 ** email textile as html - javascript textile to html converter
 ** email markdown as html - javascript markdown to html converter
@@ -66,6 +68,7 @@ h2. Settings / Config
 
 h1. App Names
 
+* Textsmith
 * textbench
 * Text Station
 * Textify
@@ -92,7 +95,6 @@ h1. App Names
 * Textbelt
 * Textman
 * Textbandit
-* Textsmith
 * Itextify
 * I* (I in front of everything)
 * Iwebedit
