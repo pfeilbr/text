@@ -150,14 +150,44 @@
 	// Add the split view controller's view to the window and display.
 	[window addSubview:splitViewController.view];
     
-
-    
 	//[self performSelector:@selector(webView:) withObject:self afterDelay:1.0];
     [window makeKeyAndVisible];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(toggleFullScreen:)
+                                                 name:BPToggleFullScreenNotification
+                                               object:nil];
+
 	
-	[self performSelector:@selector(showFullScreen:) withObject:self afterDelay:2.0];
+	//[self performSelector:@selector(showFullScreen:) withObject:self afterDelay:2.0];
 	
+    isFullScreen = NO;
+    
 	return YES;
+}
+
+- (void)toggleFullScreen:(id)target {
+    //UIViewController *vc0 = (UIViewController*)[splitViewController.viewControllers objectAtIndex:0];
+    UIViewController *vc1 = (UIViewController*)[splitViewController.viewControllers objectAtIndex:1];
+
+    [UIView beginAnimations:nil context:nil];
+    
+    if (isFullScreen) {
+        [vc1.view removeFromSuperview];
+        [tmpView addSubview:vc1.view];
+        CGAffineTransform rotate = CGAffineTransformMakeRotation(0.0);
+        vc1.view.transform = rotate;
+        [window addSubview:splitViewController.view];       
+    } else {
+        [splitViewController.view removeFromSuperview];
+        tmpView = vc1.view.superview;
+        [vc1.view removeFromSuperview];
+        [window addSubview:vc1.view];        
+    }
+    
+    isFullScreen = !isFullScreen;
+    
+    [UIView commitAnimations];    
 }
 
 - (void)showFullScreen:(id)target {

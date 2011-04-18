@@ -44,7 +44,7 @@ enum TextViewActions {
 
 @implementation DetailViewController
 
-@synthesize toolbar, itemLabel, itemLabelTextField, itemLabelBarButtonItem, popoverController, detailDescriptionLabel, textView, inputAccessoryView, rootViewController, actionsButton, actionSheet, settingsButton, inputAccessoryViewCache;
+@synthesize toolbar, toggleFullScreenButtonItem, itemLabel, itemLabelTextField, itemLabelBarButtonItem, popoverController, detailDescriptionLabel, textView, inputAccessoryView, rootViewController, actionsButton, actionSheet, settingsButton, inputAccessoryViewCache;
 @synthesize itemManager, item, inputAccessoryViewDefinition;
 @synthesize settingsMetadata;
 @synthesize contentWebViewController;
@@ -545,6 +545,7 @@ enum TextViewActions {
     
     barButtonItem.title = @"Files";
     NSMutableArray *items = [[toolbar items] mutableCopy];
+    [items removeObject:toggleFullScreenButtonItem];
     [items insertObject:barButtonItem atIndex:0];
     [toolbar setItems:items animated:YES];
     [items release];
@@ -557,6 +558,7 @@ enum TextViewActions {
     
     NSMutableArray *items = [[toolbar items] mutableCopy];
     [items removeObjectAtIndex:0];
+    [items insertObject:toggleFullScreenButtonItem atIndex:0];
     [toolbar setItems:items animated:YES];
     [items release];
     self.popoverController = nil;
@@ -575,6 +577,8 @@ enum TextViewActions {
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation duration:(NSTimeInterval)duration {
 }
 
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+}
 
 #pragma mark -
 #pragma mark View lifecycle
@@ -615,6 +619,8 @@ enum TextViewActions {
 	
 	itemLabelBarButtonItem.customView.backgroundColor = [UIColor clearColor];
 	itemLabel.backgroundColor = [UIColor clearColor];
+    
+    self.toggleFullScreenButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemReply target:self action:@selector(toggleFullScreen:)];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(itemLabelTextFieldDidEndEditingNotification:)
@@ -638,6 +644,10 @@ enum TextViewActions {
 													  object:nil];
 	
 	[self clear];
+}
+
+- (void)toggleFullScreen:(id)sender {
+    [[NSNotificationCenter defaultCenter] postNotificationName:BPToggleFullScreenNotification object:self userInfo:nil];
 }
 
 

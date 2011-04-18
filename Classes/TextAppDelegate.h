@@ -28,6 +28,7 @@
 	RootViewController *rootViewController;
 	DetailViewController *detailViewController;
     
+    BOOL isFullScreen;
     UIView *tmpView;
 }
 

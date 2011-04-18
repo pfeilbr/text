@@ -47,6 +47,8 @@
 #define BPRenameFolderNotification @"BPRenameFolderNotification"
 #define BPItemDeletedNotification @"BPItemDeletedNotification"
 
+#define BPToggleFullScreenNotification @"BPToggleFullScreenNotification"
+
 #define BPSettingsChangedNotification @"BPSettingsChangedNotification"
 
 #define BPItemActionEmailFile @"Email"

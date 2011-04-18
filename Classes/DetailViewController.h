@@ -24,6 +24,7 @@
 @interface DetailViewController : UIViewController <BPItemManagerDelegate, UIPopoverControllerDelegate, UISplitViewControllerDelegate, UITextViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate> {
 	UIPopoverController *popoverController;
 	UIToolbar *toolbar;
+    UIBarButtonItem *toggleFullScreenButtonItem;
 	UIBarButtonItem *itemLabelBarButtonItem;
 	UILabel *itemLabel;
 	UITextField *itemLabelTextField;
@@ -47,6 +48,7 @@
 }
 
 @property (nonatomic, retain) IBOutlet UIToolbar *toolbar;
+@property (nonatomic, retain) IBOutlet UIBarButtonItem *toggleFullScreenButtonItem;
 @property (nonatomic, retain) IBOutlet UILabel *itemLabel;
 @property (nonatomic, retain) IBOutlet UITextField *itemLabelTextField;
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *itemLabelBarButtonItem;
