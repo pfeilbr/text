@@ -1,0 +1,64 @@
+{
+	"fontSizeDefinitions": [
+		{
+			"name": "Small",
+			"value": "12.0"
+		},
+		{
+			"name": "Normal",
+			"value": "14.0"
+		},
+		{
+			"name": "Large",
+			"value": "18.0"
+		},
+		{
+			"name": "Extra Large",
+			"value": "28.0"
+		}		
+	],
+	"settings": {
+		"sections": [
+			{
+				"name": "Dropbox",
+				"rows": [
+					{
+						"name": "Link to Dropbox",
+						"defaultsKeyName": "dropboxLink",
+						"defaultValue": "Link"
+					}						
+				]
+			},		
+			{
+				"name": "Color",
+				"rows": [
+					{
+						"name": "Text",
+						"defaultsKeyName": "textColor",
+						"defaultValue": "blackColor"
+					},
+					{
+						"name": "Background",
+						"defaultsKeyName": "backgroundColor",						
+						"defaultValue": "whiteColor"
+					}						
+				]
+			},
+			{
+				"name": "Font",
+				"rows": [
+					{
+						"name": "Font",
+						"defaultsKeyName": "fontName",						
+						"defaultValue": "ArialRoundedMTBold"							
+					},
+					{
+						"name": "Size",
+						"defaultsKeyName": "fontSize",						
+						"defaultValue": "Normal"
+					}						
+				]
+			}				
+		]		
+	}
+}
